@@ -16,8 +16,8 @@ $(function() {
   code_editor = new CodeMirror.fromTextArea(code_id, {
     content: slides_hash[extract_id($(".current"))].code,
     parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
-    stylesheet: "/javascripts/CodeMirror/css/jscolors.css",
-    path: "/javascripts/CodeMirror/js/",
+    stylesheet: "javascripts/CodeMirror/css/jscolors.css",
+    path: "javascripts/CodeMirror/js/",
     autoMatchParens: true,
     width: "100%",
     height: "100%",
