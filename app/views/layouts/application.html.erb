@@ -3,10 +3,14 @@
 
     <link rel="stylesheet/less" type="text/css" href="/stylesheets/application.less" >
     <%= javascript_include_tag 'less-1.0.41.min.js' %>
+    <script type="text/javascript" charset="utf-8">
+            less.env = "development";
+            less.watch();
+    </script>
 
   <%= javascript_include_tag "jquery-1.4.4.min", "jquery-ui-1.8.7.custom.min", "jquery.rails.js" %>
-  <%= javascript_include_tag 'codemirror/js/codemirror' %>
-  <%= javascript_include_tag 'codemirror/js/mirrorframe' %>
+  <%= javascript_include_tag 'CodeMirror/js/codemirror' %>
+  <%= javascript_include_tag 'CodeMirror/js/mirrorframe' %>
   <%= javascript_include_tag 'prettify/prettify' %>
   <%= javascript_include_tag 'note' %>
   <%= javascript_include_tag 'jquery.livequery' %>
