@@ -1,0 +1,203 @@
+@import "d3";
+@width: 900px;
+@height: 700px;
+@slide_margin: 20px;
+
+.raphael {
+  width: 100%;
+  height: 100%;
+}
+.canvas {
+  width: 100%;
+  height: 100%;
+
+  div {
+    font: 10px sans-serif;
+    background-color: steelblue;
+    text-align: right;
+    padding: 3px;
+    margin: 1px;
+    color: white;
+  }
+}
+
+button {float: left;}
+body {
+  font: 20px "Lucida Grande", "Trebuchet MS", Verdana, sans-serif;
+  background: rgba(25, 25, 25, .9);
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0px; top: 0px;
+  overflow: hidden;
+}
+p { margin: 10px; }
+.presentation {
+  background: -webkit-gradient(linear, left top, left bottom, from(#444), to(black));
+  background: -moz-linear-gradient(top, #444, black);
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+  display: block;
+  overflow: hidden;
+}
+a.info {
+  display: none;
+  position: absolute;
+  border: none;
+  top: -16px;
+  right: -4px;
+  img { width: 25px; }
+}
+.slides {
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  position: absolute;
+  display: block;
+  -webkit-transition: -webkit-transform 1s ease-out;
+  -webkit-transform: scale(1);
+  -moz-transition: -moz-transform 1.5s ease-in-out;
+}
+#editor { display:none;}
+.editor, .code {
+  position: absolute;
+  width: 640px;
+  height: 500px;
+  top: 50%;
+  left: 5px;
+  margin-top: 500px*(-0.5);
+  z-index: 999;
+  font-size: 1em;
+  background: white;
+}
+.slide_transition {
+  -webkit-transition: all 0.35s ease-in-out;
+}
+.slide {
+  width: @width;
+  height: @height;
+  top: 50%; 
+  margin-top: @height*(-0.5);
+  -webkit-box-shadow: 0px 0px 9px black;
+  background: -webkit-gradient(linear, left bottom, left top, from(#BBD), to(white));
+}
+.zoomed_out_slide {
+  display: none;
+  position: absolute;
+  right: 0px;
+  margin-right: -133px;
+  z-index: 1000;
+  -webkit-transform: scale(.7);
+}
+.zoomed_in_slide {
+  opacity: .35;
+  display: none;
+  position: absolute;
+  left: 50%;
+}
+.slide:nth-child(even) {
+  -moz-border-radius: 20px 0;
+  -khtml-border-radius: 20px 0;
+  border-radius: 20px 0; /* includes Opera 10.5+ */
+  -webkit-border-top-left-radius: 20px;
+  -webkit-border-bottom-right-radius: 20px;
+}
+.slide:nth-child(odd) {
+  -moz-border-radius: 0 20px;
+  -khtml-border-radius: 0 20px;
+  border-radius: 0 20px;
+  -webkit-border-top-right-radius: 20px;
+  -webkit-border-bottom-left-radius: 20px;
+}
+.reduced {
+  -webkit-transform: scale(0.8);
+} 
+.slide.far-past {
+  display: block;
+  margin-left: @width*(-2.5) - @slide_margin*3;
+}
+.slide.past {
+  visibility: visible;
+  display: block;
+  margin-left: @width*(-1.5) - @slide_margin;
+}
+.slide.current {
+  opacity: 1.0;
+  visibility: visible;
+  display: block;
+  margin-left: @width*(-0.5);
+}
+.slide.future {
+  visibility: visible;
+  display: block;
+  margin-left: @width*(0.5) + @slide_margin;
+}
+.slide.far-future {
+  display: block;
+  margin-left: @width*(1.5) + @slide_margin*2;
+}
+.note {
+  border-color: "rgba(25, 25, 25, 0)";
+  border-style: dashed;
+  border-width: 1px;
+  position: absolute !important;
+  float: none !important;
+  margin: 0 !important;
+  color: #444444;
+  z-index: 10;
+  overflow: hidden;
+}
+.preview {
+  position: absolute;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+}
+.edit_area {
+  background: rgba(1, 1, 1, 0);
+  display: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: scroll;
+  position: absolute;
+  border: none;
+  font-size: 1em;
+  color: #444444;
+}
+a.delete {
+  display: none;
+  position: absolute;
+  border: none;
+  top: -20px;
+  right: -10px;
+}
+.preview ::-webkit-scrollbar, .edit_area ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.preview ::-webkit-scrollbar-thumb, .edit_area ::-webkit-scrollbar-thumb {
+  background-color: #FB0 !important;
+}
+.preview ::-webkit-scrollbar-track, .edit_area ::-webkit-scrollbar-track {
+  -webkit-border-radius: 3px;
+  border-top-left-radius: 3px 3px;
+  border-top-right-radius: 3px 3px;
+  border-bottom-right-radius: 3px 3px;
+  border-bottom-left-radius: 3px 3px;
+}
+
+.preview ::-webkit-scrollbar-track-piece, .edit_area ::-webkit-scrollbar-track-piece {
+  -webkit-border-radius: 3px;
+  border-top-left-radius: 3px 3px;
+  border-top-right-radius: 3px 3px;
+  border-bottom-right-radius: 3px 3px;
+  border-bottom-left-radius: 3px 3px;
+}
+
