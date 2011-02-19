@@ -27,6 +27,7 @@ class SlideshowsController < ApplicationController
     @slideshow = Slideshow.find_or_create_by_id(params[:id])
     @slideshow.title = params[:title]
     @slideshow.content = params[:content]
+    @slideshow.version = params[:version]
     @slideshow.save
 
     respond_to do |format|

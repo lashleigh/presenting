@@ -1,17 +1,20 @@
 var code_editor;
+var local_version;
 var res;
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
 var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
 $(function() {
 
-  if(typeof slideshow_hash != "undefined") {
-    console.log(slideshow_hash);
+
+  if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
+    console.log("using db version");
     slides_hash = slideshow_hash.slides;
     notes_hash = slideshow_hash.notes;
     make_slides();
     make_notes();
   } else {
+    console.log("using local version");
     read_slides();
     read_notes();
     make_slides();
@@ -35,11 +38,14 @@ $(function() {
 
   $("#save_slideshow").live("click", function(event) {
     var slideshow_hash = {};
+    save_notes();
+    save_slides();
     slideshow_hash.slides = slides_hash;
     slideshow_hash.notes = notes_hash;
     var content = JSON.stringify(slideshow_hash);
     $.post("/update", {
       id: get_id(),
+      version: local_version,
       title: "Testing",
       content: content }, function(result, txtstatus) {
       //$("#content").append(result);
@@ -437,10 +443,27 @@ function make_slides() {
     }
   }
 }
-function read_slides() { slides_hash = JSON.parse(localStorage.getItem("slides")); }
-function read_notes()  { notes_hash = JSON.parse(localStorage.getItem("notes")); }
-function save_slides() { localStorage.setItem("slides", JSON.stringify(slides_hash)); }
-function save_notes()  { localStorage.setItem("notes", JSON.stringify(notes_hash)); }
+function local_name(type) {
+  if(typeof get_id() != "undefined") {
+    return type+slideshow_id;
+  } else {
+    return type;
+  }
+}
+function read_slides() { slides_hash = JSON.parse(localStorage.getItem(local_name("slides"))); }
+function read_notes()  { notes_hash = JSON.parse(localStorage.getItem(local_name("notes"))); }
+function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); }
+function save_notes()  { localStorage.setItem(local_name("notes"), JSON.stringify(notes_hash));   increment_version(); }
+
+function read_version()  { 
+  local_version = JSON.parse(localStorage.getItem(local_name("version")) ); 
+  return local_version;
+}
+function increment_version()  { 
+  var v = parseInt(localStorage.getItem(local_name("version")));
+  var updated_version = v ? (v+=1):1
+  localStorage.setItem(local_name("version"), updated_version ); 
+}
 
 function set_and_run_code(selector) {
   var id = extract_id(selector);
