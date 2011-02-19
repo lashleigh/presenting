@@ -1,9 +1,14 @@
+<script type="text/javascript">
+  var slideshow_hash = <%= @slideshow.content.html_safe %>;
+  var slideshow_id = <%= @slideshow.id %>;
+</script>
+
 <div id="presentation" class="presentation editing_mode">
   <div id="cue_box"> Editing Mode </div>
   <div id="editor" class="editor">
       <textarea id="code" class="code"></textarea>
   </div>
-  <div id="slides" class="slides"> 
+  <div id="slides" class="slides">
     <button id="save_slideshow" >Save</button>
   </div>
 </div>

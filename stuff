@@ -1,0 +1,22 @@
+h2(pink). \"sub header with its own class...\"\n\n
+* *an item*\n
+* _and another_\n
+* a plain one just for fun\n
+* @some test code@\n\n
+p=. Center a paragraph\n\n
+# one\n
+# two\n
+# threve\n\n
+The code shown here gets syntax highlighting from "prettify":http://code.google.com/p/google-code-prettify/.\n\n
+bc. cross (a1,a2) (b1,b2) (c1,c2)\n
+    | thing == 0 = Straight\n
+    | thing  &gt; 0 = LeftTurn\n
+    | thing  &lt; 0 = RightTurn\n
+    where thing = (c2 - a2)(b1 - a1) - (c1 - a1)(b2 - a2)\n\n
+bc. directionList [] = []\n
+directionList (_:[]) = []\n
+directionList (_:_:[]) = []\n
+directionList (a:b:c:xs) = cross a b c : directionList (b:c:xs)\n\n
+
+"h2(pink). \"sub header with its own class...\"\n\n* *an item*\n* _and another_\n* a plain one just for fun\n* @some test code@\n\np=. Center a paragraph\n\n# one\n# two\n# threve\n\nThe code shown here gets syntax highlighting from \"prettify\":http://code.google.com/p/google-code-prettify/.\n\nbc. cross (a1,a2) (b1,b2) (c1,c2)\n   | thing == 0 = Straight\n   | thing  &gt; 0 = LeftTurn\n   | thing  &lt; 0 = RightTurn\n   where thing = (c2 - a2)(b1 - a1) - (c1 - a1)(b2 - a2)\n\nbc. directionList [] = []\ndirectionList (_:[]) = []\ndirectionList (_:_:[]) = []\ndirectionList (a:b:c:xs) = cross a b c : directionList (b:c:xs)\n\n" 
+

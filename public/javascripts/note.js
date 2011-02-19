@@ -2,12 +2,21 @@ var code_editor;
 var res;
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
-var slides_hash = {}, notes_hash = {}, papers = {};
+var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
 $(function() {
-  read_slides();
-  read_notes();
-  make_slides();
-  make_notes();
+
+  if(typeof slideshow_hash != "undefined") {
+    console.log(slideshow_hash);
+    slides_hash = slideshow_hash.slides;
+    notes_hash = slideshow_hash.notes;
+    make_slides();
+    make_notes();
+  } else {
+    read_slides();
+    read_notes();
+    make_slides();
+    make_notes();
+  }
   setCurrent();
   slideWidth = $(".slide").width();
   slideHeight = $(".slide").height();
@@ -16,17 +25,36 @@ $(function() {
   code_editor = new CodeMirror.fromTextArea(code_id, {
     content: slides_hash[extract_id($(".current"))].code,
     parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
-    stylesheet: "javascripts/codemirror/css/jscolors.css",
-    path: "javascripts/codemirror/js/",
+    stylesheet: "/javascripts/codemirror/css/jscolors.css",
+    path: "/javascripts/codemirror/js/",
     autoMatchParens: true,
     width: "100%",
     height: "100%",
     saveFunction: function() {save_and_run_code();}
   });
 
+  $("#save_slideshow").live("click", function(event) {
+    var slideshow_hash = {};
+    slideshow_hash.slides = slides_hash;
+    slideshow_hash.notes = notes_hash;
+    var content = JSON.stringify(slideshow_hash);
+    $.get("/update", {
+      id: get_id(),
+      title: "Testing",
+      content: content }, function(result, txtstatus) {
+      //$("#content").append(result);
+      console.log(result);    
+      });
+  });
+  $(".canvas").dblclick( function(event) {
+    if( $($(event.target).parent()).hasClass("canvas") && $(".presentation").hasClass("editing_mode") ){
+      var raphael_id = $($(event.target).parent()).parent().attr("id");
+      new_note_from_click(event, raphael_id);
+    }
+  });
 
   $(".raphael").dblclick( function(event) {
-    if( $($(event.target).parent()).hasClass("raphael") ){
+    if( $($(event.target).parent()).hasClass("raphael") && $(".presentation").hasClass("editing_mode")){
       var raphael_id = $(event.target).parent().attr("id");
       new_note_from_click(event, raphael_id);
     }
@@ -68,9 +96,9 @@ $(function() {
       snapMode: "outer",
       containment: $(this).parent(),
       refreshPositions: true,
-      opacity: 0.6,
       drag: function(event, ui) {
         show_borders_this_red(this);
+        $(this).css("opacity", 0.6);
         var thisWidth = parseInt($(this).css("width"));
         var thisHeight = parseInt($(this).css("height"));
         uiLeft = ui.position.left;
@@ -87,6 +115,7 @@ $(function() {
       stop: function(event, ui) {
         $(this).css("left", uiLeft+"px");
         $(this).css("top", uiTop+"px");
+        $(this).css("opacity", 1.0);
         clear_borders();
         grey_border(this);
         var id = extract_note_id(this);
@@ -103,6 +132,7 @@ $(function() {
       handles: 'ne, nw, se, sw, n, e, s, w',
       containment: $(this).parent(),
       resize: function(event, ui) {
+        $(this).css("opacity", 0.6);
         show_borders_this_red(this);
         uiWidth = ui.size.width;
         uiLeft = ui.position.left;
@@ -129,6 +159,7 @@ $(function() {
         $(this).find('.edit_area').css("height",(uiHeight)+"px");
       },
       stop: function(event, ui) {
+        $(this).css("opacity", 1.0);
         clear_borders();
         grey_border(this);
         var id = extract_note_id(this);
@@ -285,45 +316,22 @@ function Slide(I) {
     I = I || {}
 
     I.id = (new Date()).getTime();
-    I.code = ""; /*='demo1 = paper.circle(320, 240, 60).animate({fill: "#223fa3", stroke: "#000", "stroke-width": 80, "stroke-opacity": 0.5}, 2000);\n'+
-                    'demo1.node.onclick = function () {\n'+
-                    '    demo1.attr("fill", "red");\n'+
-                    '};\n\n'+
-                    'var st = paper.set(); \n'+
-                    'st.push( \n'+
-                    '  paper.rect(800, 300, 50, 50, 10), \n'+
-                    '  paper.circle(670, 100, 60) \n'+
-                    ');\n\n'+
-                    'st.animate({fill: "red", stroke: "#000", "stroke-width": 30, "stroke-opacity": 0.5}, 1000);';*/
+    I.code = ""; 
     I.raphael_id = "raphael_"+I.id;
    
     return I;
 }
 
 function create_canvas(slide) {
-  papers[slide.id] = d3.select("#"+slide.raphael_id).append("div").attr("class", "canvas"); //Raphael(slide.raphael_id, 900, 700), dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
+  d3_papers[slide.id] = d3.select("#"+slide.raphael_id).append("div").attr("class", "canvas");
+  //raphael_papers[slide.id] = Raphael(slide.raphael_id, 900, 700), dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
  
   set_canvas(slide);
 }
 function set_canvas(slide) {
   //var paper = $("#"+slide.raphael_id).find(".canvas");
-  var paper = papers[slide.id]
-      $("#slide_"+slide.id+" .canvas").html("");
-      //paper.clear();
-      /*var button = paper.circle(20, 680, 10).attr("fill", "red");
-      $(button.node).mouseenter( function() {
-        button.animate({scale: "1.5 1.5"}, 2000, "bounce");
-      });
-      $(button.node).mouseout( function() {
-        button.animate({scale: "1.0 1.0"}, 2000, "bounce");
-      });
-      $(button.node).dblclick( function() { go_to_next();*/
-        //delete slides_hash[slide.raphael_id];
-        //$(".current").hide();
-        //go_to_next();
-        //delete slides_hash[slide.raphael_id];
-        //save_slides();
-      //});
+  var paper = d3_papers[slide.id];
+  $("#slide_"+slide.id+" .canvas").html("");
   try {
     (new Function("paper", "window", "document", slide.code ) ).call(paper, paper);
   } catch (e) {
@@ -352,6 +360,7 @@ function new_note_from_click(event, raphael_id) {
   n.left = event.offsetX;
   $("#"+n.slide_id).append(note_html(n));
   notes_hash[n.note_id] = n;
+  save_notes();
 }
 function get_style(note) {
   var style = "position:absolute;width:"+note.width+"px;height:"+note.height+'px;top:'+note.top+'px;left:'+note.left+'px;';
@@ -456,4 +465,12 @@ function extract_id(selector) {
 
 function extract_note_id(selector) {
   return $(selector).attr("id");
+}
+
+function get_id() {
+  if(typeof slideshow_id != "undefined") {
+    return slideshow_id;
+  } else {
+    return null;
+  }
 }

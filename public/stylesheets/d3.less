@@ -1,38 +1,47 @@
+
 svg {
   font: 10px sans-serif;
 }
 
-circle {
-  fill: lightsteelblue;
-  stroke: steelblue;
-  stroke-width: 1.5px;
-}
-
 rect {
-  fill: none;
-  stroke: #000;
-  stroke-opacity: .3;
-  shape-rendering: crispEdges;
-}
-body {
-  font: 10px sans-serif;
-}
-
-.rule line {
-  stroke: #f00;
   shape-rendering: crispEdges;
 }
 
-.rule line.axis {
-  stroke: #000;
+line {
+  stroke: black;
+  shape-rendering: crispEdges;
 }
 
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1.5px;
+button {
+  font: 14px Helvetica Neue;
+  background: #222 url(http://bost.ocks.org/button-overlay.png) repeat-x;
+  color: #fff;
+  text-rendering: optimizeLegibility;
+  text-shadow: 0 -1px 1px #222;
+  padding: 6px 10px 6px 10px;
+  border: 0;
+  margin: 0 0 4px 2px;
+  border-bottom: 1px solid #222;
+  -moz-border-radius: 5px;
+  -moz-box-shadow: 0 1px 3px #999;
+  -webkit-border-radius: 5px;
+  -webkit-box-shadow: 0 1px 3px #999;
 }
 
-circle.line {
-  fill: #fff;
+button.first {
+  -webkit-border-top-right-radius: 0;
+  -webkit-border-bottom-right-radius: 0;
+}
+
+button.last {
+  -webkit-border-top-left-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+}
+
+button.active {
+  background-color: rgb(65,102,133);
+}
+
+button:hover {
+  background-color: steelblue;
 }

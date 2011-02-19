@@ -1,5 +1,9 @@
 Presenting::Application.routes.draw do
   get "home/index"
+  get "home/preview"
+
+  resources :slideshows
+  get "update" => "slideshows#update", :as => "update"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
