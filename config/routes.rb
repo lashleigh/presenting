@@ -3,7 +3,7 @@ Presenting::Application.routes.draw do
   get "home/preview"
 
   resources :slideshows
-  get "update" => "slideshows#update", :as => "update"
+  post "update" => "slideshows#update", :as => "update"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

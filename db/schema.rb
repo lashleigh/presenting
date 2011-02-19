@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110219075607) do
+ActiveRecord::Schema.define(:version => 20110219094943) do
 
   create_table "previews", :force => true do |t|
     t.string   "content"
@@ -20,7 +20,7 @@ ActiveRecord::Schema.define(:version => 20110219075607) do
 
   create_table "slideshows", :force => true do |t|
     t.string   "title"
-    t.text     "content"
+    t.text     "content",    :limit => 5242880
     t.datetime "created_at"
     t.datetime "updated_at"
   end

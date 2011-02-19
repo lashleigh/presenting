@@ -38,7 +38,7 @@ $(function() {
     slideshow_hash.slides = slides_hash;
     slideshow_hash.notes = notes_hash;
     var content = JSON.stringify(slideshow_hash);
-    $.get("/update", {
+    $.post("/update", {
       id: get_id(),
       title: "Testing",
       content: content }, function(result, txtstatus) {
