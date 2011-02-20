@@ -1,11 +1,12 @@
+var res_start, res_stop;
 var code_editor;
-var local_version;
+var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
 var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
 $(function() {
 
-
+  order = ["raphael_1298069377434", "raphael_1298069377437", "raphael_1298069377436", "raphael_1298071948864"]
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
     console.log("using db version");
     slides_hash = slideshow_hash.slides;
@@ -187,7 +188,12 @@ $(function() {
     }
   }, false);
 
-  $("#boxes").sortable({});
+  $("#boxes").sortable({
+    stop: function(event, ui) {
+     res_stop = ui;
+     update_slide_order();
+    }
+  });
   //$(".controlbar").css("left", (document.width- 160)+"px");
   $(".controlbar").live("mouseenter", function(event) {
       $(".controlbar").css("margin-left", "0px");
@@ -196,6 +202,19 @@ $(function() {
       $(".controlbar").css("margin-left", "-160px");
   });
 });
+function update_slide_order() {
+  var new_order = $("#boxes").sortable('toArray');
+  code_editor.setCode("");
+  for(var i = 0; i < new_order.length; i++) {
+    order[i] = new_order[i].replace("mini", "raphael");
+  }
+  $(".slides").html("");
+  $("#boxes").html("");
+  make_slides(); 
+  make_notes();
+  setCurrent();
+  code_editor.setCode(slides_hash[extract_id($(".current"))].code);
+}
 
 function handleKeys(e) {
  switch (e.keyCode) {
@@ -236,6 +255,7 @@ function presentationMode() {
     $(".note").removeClass("editable");
     $(".note").draggable("disable");
     $(".note").resizable("disable");
+    $(".controlbar").hide();
 }
 function editingMode() {
     $(".presentation").addClass("editing_mode");
@@ -243,6 +263,7 @@ function editingMode() {
     $(".note").addClass("editable");
     $(".note").draggable("enable");
     $(".note").resizable("enable");
+    $(".controlbar").show();
 }
 function go_to_prev() {
   var current = $(".current")
@@ -417,10 +438,12 @@ function note_html(note) {
 function slide_html(slide) {
     return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
               '<div id="'+slide.raphael_id+'" class="raphael"> </div>'+
+              '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
            '</div>'
 }
 function box_html(slide) {
-    return '<div class="box app">'+slide.id+'</div>'
+    //return '<div class="box app" id="mini_'+slide.id+'" style="-webkit-transform:scale(1);background:url(/images/slide_'+slide.id+'.png);">'+slide.id+'</div>'
+    return '<div class="box app" id="mini_'+slide.id+'">'+slide.raphael_id+'</div>'
 }
 function handleCorner(event) {
     var border = $("#face-rounded-border").val();
@@ -444,14 +467,23 @@ function make_notes() {
 }
 
 function make_slides() {
-  if( slides_hash != null) {
+  /*if( slides_hash != null) {
     for( s_id in slides_hash) {
       var slide = slides_hash[s_id];
       $(".slides").append(slide_html(slide));
       $("#boxes").append(box_html(slide));
       create_canvas(slide);
     }
-  } 
+  }*/
+  if( slides_hash != null) {
+    for(var i = 0; i < order.length; i++) {
+      var slide = slides_hash[order[i]]
+      $(".slides").append(slide_html(slide));
+      $("#boxes").append(box_html(slide));
+      create_canvas(slide);
+    }
+    make_notes();
+  }
   else {
     slides_hash = {};
     for(var i = 0; i < 3; i++) {
