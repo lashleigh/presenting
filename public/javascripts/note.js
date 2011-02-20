@@ -1,4 +1,4 @@
-var res_start, res_stop;
+var res_start;
 var code_editor;
 var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
@@ -22,7 +22,7 @@ $(function() {
     make_slides();
     make_notes();
   }
-  setCurrent();
+  setCurrent(0);
   //presentationMode();
   editingMode();
   slideWidth = $(".slide").width();
@@ -75,7 +75,6 @@ $(function() {
     $(".edit_area").hide();
     $(this).find(".preview").hide();
     $(this).find(".edit_area").show().focus();
-    event.stopPropagation();
   });
 
   $(".editable").live("focusout", function(event) {
@@ -92,13 +91,8 @@ $(function() {
     save_notes();
     prettify();
   });
-  $(".editable").live("mouseenter", function() {
-    grey_border(this);
-    //prettify();
-  });
-  $(".editable").live("mouseleave", function() {
-    clear_borders()
-  });
+  $(".editable").live("mouseenter", function() { grey_border(this); });
+  $(".editable").live("mouseleave", function() { clear_borders();   });
 
   $(".editable").livequery( function() {
     $(this).draggable({ 
@@ -194,11 +188,16 @@ $(function() {
 
   $("#boxes").sortable({
     stop: function(event, ui) {
-     res_stop = ui;
+     res_start = ui.item;
      update_slide_order();
     }
   });
-  //$(".controlbar").css("left", (document.width- 160)+"px");
+
+  $(".box").live("click", function() {
+    var index = $("#"+$(this).attr("id").replace("mini", "slide")).index() -1;
+    $(".slide").removeClass("current future past far-future far-past reduced");
+    setCurrent(index);
+  });
   $(".controlbar").live("mouseenter", function(event) {
       $(".controlbar").css("margin-left", "0px");
   });
@@ -206,6 +205,7 @@ $(function() {
       $(".controlbar").css("margin-left", "-160px");
   });
 });
+
 function update_slide_order() {
   var new_order = $("#boxes").sortable('toArray');
   code_editor.setCode("");
@@ -216,7 +216,8 @@ function update_slide_order() {
   $("#boxes").html("");
   make_slides(); 
   make_notes();
-  setCurrent();
+  var index = $("#"+res_start.attr("id").replace("mini", "slide")).index() - 1;
+  setCurrent(index);
   save_order();
   code_editor.setCode(slides_hash[extract_id($(".current"))].code);
 }
@@ -287,6 +288,9 @@ function go_to_prev() {
 
   } else if( $(".presentation").hasClass("editing_mode")) {
   }
+  var mini = $(".current").attr("id").replace("slide", "mini");
+  $(".box").css("background", "white");
+  $("#"+mini).css("background", "yellow");
 }
 
 function go_to_next() {
@@ -311,6 +315,7 @@ function go_to_next() {
     var slide = Slide();
     var hash_id = slide.raphael_id;
     $(".slides").append( slide_html(slide) );
+    $("#boxes").append(box_html(slide));
     slides_hash[hash_id] = slide;
     $("#slide_"+slide.id).addClass("current")
     save_slides();
@@ -324,40 +329,33 @@ function go_to_next() {
     }
 
     // Autopopulate with two placeholder notes.    
-    var header_note = Note();
-    header_note.top = 0;
-    header_note.left = 0;
-    header_note.width = slideWidth;
-    header_note.height = 110;
-    header_note.content = "h1. Header holder";
-    header_note.slide_id = slide.raphael_id;
-    notes_hash[header_note.note_id] = header_note;
-    make_a_note(header_note);
-
-    var body_note = Note();
-    body_note.top = 120;
-    body_note.left = 0;
-    body_note.width = slideWidth;
-    body_note.height = 380;
-    body_note.content = "p(pink). paragraphs here";
-    body_note.slide_id = slide.raphael_id;
-    notes_hash[body_note.note_id] = body_note;
-    make_a_note(body_note);
-
+    header_note(slide);
+    body_note(slide);
+    clear_borders();
     save_notes();
   };
+  var mini = $(".current").attr("id").replace("slide", "mini");
+  $(".box").css("background", "white");
+  $("#"+mini).css("background", "yellow");
   set_and_run_code($(".current"));
 }
 
-function setCurrent() {
-  $($(".slide")[0]).addClass("current")
-  $($(".slide")[1]).addClass("reduced future")
+function setCurrent(index) {
+  $($(".slide")[index]).addClass("current")
+  $($(".slide")[index+1]).addClass("reduced future")
+  $($(".slide")[index-1]).addClass("reduced past")
   for( var i = 2; i < $(".slide").length; i++) {
-    $($(".slide")[i]).addClass("reduced far-future")
+    $($(".slide")[index+i]).addClass("reduced far-future")
+  }
+  for( var i = 0; i <= index - 2; i++) {
+    $($(".slide")[i]).addClass("reduced far-past")
   }
   var id = extract_id( $(".current"));
   $("#editor textarea").val(slides_hash[id].code);
   set_canvas(slides_hash[id]);
+  var mini = $(".current").attr("id").replace("slide", "mini");
+  $(".box").css("background", "white");
+  $("#"+mini).css("background", "yellow");
 }
 function Slide(I) {
     I = I || {}
@@ -409,28 +407,6 @@ function new_note_from_click(event, raphael_id) {
   notes_hash[n.note_id] = n;
   save_notes();
 }
-function get_style(note) {
-  var style = "position:absolute;width:"+note.width+"px;height:"+note.height+'px;top:'+note.top+'px;left:'+note.left+'px;';
-  return style;
-}
-
-function show_borders_this_red(note) {
-  $(".note").css("border-color", "rgba(25, 25, 25, 0.5)");
-  $(note).css("border-color", "rgba(255, 25, 25, 0.8)");
-}
-function clear_borders() {
-  $(".note").css("border-color", "rgba(25, 25, 25, 0.0)");
-  $(".info").hide();
-}
-function grey_border(note) {
-  $(note).css("border-color", "rgba(55, 25, 25, 0.8)");
-}
-function prettify() {
-  //$("pre").addClass("prettyprint");
-  $("code").addClass("prettyprint");
-  prettyPrint();
-}
-
 function make_a_note(note) {
   $("#"+note.slide_id).append(note_html(note));
 }
@@ -450,17 +426,7 @@ function box_html(slide) {
     //return '<div class="box app" id="mini_'+slide.id+'" style="-webkit-transform:scale(1);background:url(/images/slide_'+slide.id+'.png);">'+slide.id+'</div>'
     return '<div class="box app" id="mini_'+slide.id+'">'+$(".slide").size()+'</div>'
 }
-function handleCorner(event) {
-    var border = $("#face-rounded-border").val();
-    var scale = border / 100;
-    var width = $(".current").width();
-    var margin_right = (-1)*(width*(1-scale)/2);
-    var exact_scale = parseFloat($($(".current").css("-webkit-transform").split(","))[0].split("(")[1]);
-    var editor_width = screen.availWidth - 10 - $(".current").width()*exact_scale;
-    $(".current").css('-webkit-transform','scale('+scale+')');
-    $(".current").css('margin-right', margin_right+'px');
-    $("#editor").css('width', editor_width+'px');
-}
+
 function make_notes() {
   if( notes_hash != null) {
     for( n in notes_hash) {
