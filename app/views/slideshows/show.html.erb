@@ -4,13 +4,5 @@
   var slideshow_version = <%= @slideshow.version %>;
 </script>
 
-<div id="presentation" class="presentation editing_mode">
-  <div id="cue_box"> Editing Mode </div>
-  <div id="editor" class="editor">
-      <textarea id="code" class="code"></textarea>
-  </div>
-  <div id="slides" class="slides">
-    <button id="save_slideshow" >Save</button>
-  </div>
-</div>
+<%= render :partial => "template" %>
 

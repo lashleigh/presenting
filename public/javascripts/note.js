@@ -1,6 +1,5 @@
 var code_editor;
 var local_version;
-var res;
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
 var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
@@ -13,6 +12,7 @@ $(function() {
     notes_hash = slideshow_hash.notes;
     make_slides();
     make_notes();
+    local_version = parseInt(slideshow_version)+1;
   } else {
     console.log("using local version");
     read_slides();
@@ -21,6 +21,7 @@ $(function() {
     make_notes();
   }
   setCurrent();
+  presentationMode();
   slideWidth = $(".slide").width();
   slideHeight = $(".slide").height();
 
@@ -48,8 +49,6 @@ $(function() {
       version: local_version,
       title: "Testing",
       content: content }, function(result, txtstatus) {
-      //$("#content").append(result);
-      console.log(result);    
       });
   });
   $(".canvas").dblclick( function(event) {
@@ -188,6 +187,14 @@ $(function() {
     }
   }, false);
 
+  $("#boxes").sortable({});
+  //$(".controlbar").css("left", (document.width- 160)+"px");
+  $(".controlbar").live("mouseenter", function(event) {
+      $(".controlbar").css("margin-left", "0px");
+  });
+  $(".controlbar").live("mouseleave", function(event) {
+      $(".controlbar").css("margin-left", "-160px");
+  });
 });
 
 function handleKeys(e) {
@@ -209,14 +216,22 @@ function handleKeys(e) {
   }
 }
 function codingMode(e) {
-    $(".presentation").toggleClass("coding_mode");
-    $("#editor").toggle(e);
-    $(".current").toggleClass("zoomed_in_slide").toggleClass("zoomed_out_slide");
-    $(".slide").toggleClass("slide_transition");
+  // It was simpler to just toggle but this seems safer
+  if( $(".presentation").hasClass("coding_mode") ) {
+    $(".presentation").removeClass("coding_mode");
+    $("#editor").hide(e);
+    $(".current").addClass("zoomed_in_slide").removeClass("zoomed_out_slide");
+    $(".slide").addClass("slide_transition");
+  } else {
+    $(".presentation").addClass("coding_mode");
+    $("#editor").show(e);
+    $(".current").removeClass("zoomed_in_slide").addClass("zoomed_out_slide");
+    $(".slide").removeClass("slide_transition");
+  }
 }
 function presentationMode() {
     clear_borders();
-    $("#cue_box").hide();
+    $("#save_slideshow").hide();
     $(".presentation").removeClass("editing_mode");
     $(".note").removeClass("editable");
     $(".note").draggable("disable");
@@ -224,7 +239,7 @@ function presentationMode() {
 }
 function editingMode() {
     $(".presentation").addClass("editing_mode");
-    $("#cue_box").show();
+    $("#save_slideshow").show();
     $(".note").addClass("editable");
     $(".note").draggable("enable");
     $(".note").resizable("enable");
@@ -354,7 +369,7 @@ function Note(I) {
   I.note_id = "note_"+I.id;
   I.slide_id;
   
-  I.top; I.left; I.width = 200; I.height = 100;
+  I.top; I.left; I.width = slideWidth/3; I.height = slideHeight/4;
 
   I.content = "p{color:red;}. Placeholder";
   return I;
@@ -401,8 +416,11 @@ function note_html(note) {
 }
 function slide_html(slide) {
     return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
-                     '<div id="'+slide.raphael_id+'" class="raphael"> </div>'+
-                 '</div>'
+              '<div id="'+slide.raphael_id+'" class="raphael"> </div>'+
+           '</div>'
+}
+function box_html(slide) {
+    return '<div class="box app">'+slide.id+'</div>'
 }
 function handleCorner(event) {
     var border = $("#face-rounded-border").val();
@@ -430,6 +448,7 @@ function make_slides() {
     for( s_id in slides_hash) {
       var slide = slides_hash[s_id];
       $(".slides").append(slide_html(slide));
+      $("#boxes").append(box_html(slide));
       create_canvas(slide);
     }
   } 
@@ -444,7 +463,7 @@ function make_slides() {
   }
 }
 function local_name(type) {
-  if(typeof get_id() != "undefined") {
+  if(typeof slideshow_id != "undefined") {
     return type+slideshow_id;
   } else {
     return type;
