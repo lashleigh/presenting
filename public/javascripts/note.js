@@ -6,11 +6,11 @@ var slideWidth, slideHeight, cylonOffset;
 var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
 $(function() {
 
-  order = ["raphael_1298069377434", "raphael_1298069377437", "raphael_1298069377436", "raphael_1298071948864"]
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
     console.log("using db version");
     slides_hash = slideshow_hash.slides;
     notes_hash = slideshow_hash.notes;
+    order = slideshow_hash.order;
     make_slides();
     make_notes();
     local_version = parseInt(slideshow_version)+1;
@@ -18,11 +18,13 @@ $(function() {
     console.log("using local version");
     read_slides();
     read_notes();
+    read_order();
     make_slides();
     make_notes();
   }
   setCurrent();
-  presentationMode();
+  //presentationMode();
+  editingMode();
   slideWidth = $(".slide").width();
   slideHeight = $(".slide").height();
 
@@ -42,8 +44,10 @@ $(function() {
     var slideshow_hash = {};
     save_notes();
     save_slides();
+    save_order();
     slideshow_hash.slides = slides_hash;
     slideshow_hash.notes = notes_hash;
+    slideshow_hash.order = order;
     var content = JSON.stringify(slideshow_hash);
     $.post("/update", {
       id: get_id(),
@@ -52,14 +56,14 @@ $(function() {
       content: content }, function(result, txtstatus) {
       });
   });
-  $(".canvas").dblclick( function(event) {
+  $(".canvas").live("dblclick", function(event) {
     if( $($(event.target).parent()).hasClass("canvas") && $(".presentation").hasClass("editing_mode") ){
       var raphael_id = $($(event.target).parent()).parent().attr("id");
       new_note_from_click(event, raphael_id);
     }
   });
 
-  $(".raphael").dblclick( function(event) {
+  $(".raphael").live("dblclick", function(event) {
     if( $($(event.target).parent()).hasClass("raphael") && $(".presentation").hasClass("editing_mode")){
       var raphael_id = $(event.target).parent().attr("id");
       new_note_from_click(event, raphael_id);
@@ -208,11 +212,12 @@ function update_slide_order() {
   for(var i = 0; i < new_order.length; i++) {
     order[i] = new_order[i].replace("mini", "raphael");
   }
-  $(".slides").html("");
+  $(".slides").html('<button id="save_slideshow">Save</button>');
   $("#boxes").html("");
   make_slides(); 
   make_notes();
   setCurrent();
+  save_order();
   code_editor.setCode(slides_hash[extract_id($(".current"))].code);
 }
 
@@ -443,7 +448,7 @@ function slide_html(slide) {
 }
 function box_html(slide) {
     //return '<div class="box app" id="mini_'+slide.id+'" style="-webkit-transform:scale(1);background:url(/images/slide_'+slide.id+'.png);">'+slide.id+'</div>'
-    return '<div class="box app" id="mini_'+slide.id+'">'+slide.raphael_id+'</div>'
+    return '<div class="box app" id="mini_'+slide.id+'">'+$(".slide").size()+'</div>'
 }
 function handleCorner(event) {
     var border = $("#face-rounded-border").val();
@@ -467,23 +472,24 @@ function make_notes() {
 }
 
 function make_slides() {
-  /*if( slides_hash != null) {
-    for( s_id in slides_hash) {
-      var slide = slides_hash[s_id];
-      $(".slides").append(slide_html(slide));
-      $("#boxes").append(box_html(slide));
-      create_canvas(slide);
-    }
-  }*/
   if( slides_hash != null) {
-    for(var i = 0; i < order.length; i++) {
-      var slide = slides_hash[order[i]]
-      $(".slides").append(slide_html(slide));
-      $("#boxes").append(box_html(slide));
-      create_canvas(slide);
+    if( (order != null) && (order.length > 0) ) {
+      for(var i = 0; i < order.length; i++) {
+        var slide = slides_hash[order[i]]
+        $(".slides").append(slide_html(slide));
+        $("#boxes").append(box_html(slide));
+        create_canvas(slide);
+      }
+    } else {
+      for( s_id in slides_hash) {
+        var slide = slides_hash[s_id];
+        $(".slides").append(slide_html(slide));
+        $("#boxes").append(box_html(slide));
+        create_canvas(slide);
+      }
     }
-    make_notes();
   }
+
   else {
     slides_hash = {};
     for(var i = 0; i < 3; i++) {
@@ -505,7 +511,20 @@ function read_slides() { slides_hash = JSON.parse(localStorage.getItem(local_nam
 function read_notes()  { notes_hash = JSON.parse(localStorage.getItem(local_name("notes"))); }
 function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); }
 function save_notes()  { localStorage.setItem(local_name("notes"), JSON.stringify(notes_hash));   increment_version(); }
+function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); }
 
+
+function read_order()  { 
+  order = JSON.parse(localStorage.getItem(local_name("order"))); 
+  if(order == null) {
+    order = [];
+    var inc = 0;
+    for(id in slides_hash) {
+      order[inc] = id;
+      inc++;
+    }
+  }
+}
 function read_version()  { 
   local_version = JSON.parse(localStorage.getItem(local_name("version")) ); 
   return local_version;
