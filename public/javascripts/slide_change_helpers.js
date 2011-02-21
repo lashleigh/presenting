@@ -34,10 +34,9 @@ function set_current(index) {
 
 function create_new_slide_at_end() {
   // Create Slide
-  var slide = Slide();
-  var hash_id = "slide_"+slide.id;
+  var slide = new Slide();
   $(".slides").append( slide_html(slide) );
-  slides_hash[hash_id] = slide;
+  slides_hash[slide.slide_id()] = slide;
   $(".slide").removeClass("current")
   $("#slide_"+slide.id).addClass("current")
   create_canvas(slide);

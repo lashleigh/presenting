@@ -82,8 +82,8 @@ $(function() {
     var current_notes = $(".current .note");
     var id = current.attr("id");
     var box_id = id.replace("slide", "mini");
-    var slide = Slide();
-    var hash_id = "slide_"+slide.id;
+    var slide = new Slide();
+    var hash_id = slide.slide_id();
     slide.code = slides_hash[id].code;
     slides_hash[hash_id] = slide;
     
@@ -103,7 +103,7 @@ $(function() {
     // Duplication of notes is trickier
     var number_of_notes = current_notes.size()
     for(var i = 0; i < number_of_notes; i++) {
-      var note = Note();
+      var note = new Note();
       var copy_from_id = $(current_notes[i]).attr("id");
       var copied_note = notes_hash[copy_from_id];
          note.top = copied_note.top;
@@ -112,11 +112,10 @@ $(function() {
          note.height = copied_note.height;
          note.content = copied_note.content;
          note.slide_id = hash_id;
-         while(notes_hash["note_"+note.id] != null) { 
+         while(notes_hash[note.note_id()] != null) { 
            note.id++; 
          }
-         note.note_id = "note_"+note.id;
-         notes_hash[note.note_id] = note;
+         notes_hash[note.note_id()] = note;
          make_a_note(note);
     }
     clear_borders();
@@ -250,7 +249,7 @@ $(function() {
 
   $("#boxes").sortable({
     stop: function(event, ui) {
-     update_slide_order(ui.item);
+      update_slide_order(ui.item);
     }
   });
 
@@ -273,7 +272,6 @@ function update_slide_order(item) {
   for(var i = 0; i < new_order.length; i++) {
     order[i] = new_order[i].replace("mini", "slide");
   }
-  //$(".slides").html('<button id="save_slideshow">Save</button>');
   $(".slides .slide").remove();
   $("#boxes .box").remove();
   make_slides(); 
@@ -296,10 +294,6 @@ function handleKeys(e) {
      editingMode(); break;
    case 65: //a
      codingMode(e); break;
-   //case 51: // 3
-     //this.switch3D(); break;
-   //case 83: //S
-     //reorder_slides(); break;
   }
 }
 function codingMode(e) {
@@ -341,9 +335,7 @@ function editingMode() {
 }
 function go_to_prev() {
   var index = $(".current").index(".slide")-1;
-  if( index >= 0) { 
-    set_current(index);
-  }
+  if( index >= 0) { set_current(index); }
 }
 
 function go_to_next() {
@@ -373,7 +365,7 @@ function set_canvas(slide) {
     alert(e.message || e);
   }
 }
-function Slide(I) {
+/*function Slide(I) {
     I = I || {}
 
     I.id = (new Date()).getTime();
@@ -396,13 +388,34 @@ function Note(I) {
   I.content = "p{color:red;}. Placeholder";
   return I;
 }
+*/
+var Note = function() {
+  this.id = (new Date()).getTime();
+  this.slide_id;
+  this.top; this.left; this.width = slideWidth/3; this.height = slideHeight/4;
+  this.content = "p{color:red;}. Placeholder";
+}
+Note.prototype = {
+  note_id: function() {return "note_"+this.id;}
+}
+var Slide = function() {
+  this.id = (new Date()).getTime();
+  this.code = '// You can access raphael using \'paper\' by default\n'+ 
+              '// paper.circle(100, 100, 100)\n'+
+              '// You can access d3 using d3_paper\n';
+}
+Slide.prototype = {
+  raphael_id: function() { return "raphael_"+this.id;},
+  slide_id: function() { return "slide_"+this.id;}
+}
+
 function new_note_from_click(event, parent_id) {
-  var n = Note();
+  var n = new Note();
   n.slide_id = parent_id;
   n.top = event.offsetY;
   n.left = event.offsetX;
   $("#"+parent_id+" .notes_container").append(note_html(n));
-  notes_hash[n.note_id] = n;
+  notes_hash[n.note_id()] = n;
   save_notes();
 }
 function make_a_note(note) {
@@ -459,10 +472,10 @@ function make_slides() {
   else {
     slides_hash = {};
     for(var i = 0; i < 3; i++) {
-      var slide = Slide();
+      var slide = new Slide();
       $(".slides").append( slide_html(slide) );
       create_canvas(slide);
-      slides_hash["slide_"+slide.id] = slide;
+      slides_hash[slide.slide_id()] = slide;
     }
   }
 }

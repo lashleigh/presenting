@@ -13,34 +13,32 @@ function handleCorner(event) {
 // Helpers primarily related to notes
 //
 function header_note(slide) {
-   var header_note = Note();
+   var header_note = new Note();
    header_note.top = 0;
    header_note.left = 0;
    header_note.width = slideWidth;
    header_note.height = 200;
    header_note.content = "h1. Header holder";
    header_note.slide_id = "slide_"+slide.id;
-   while(notes_hash["note_"+header_note.id] != null) {
+   while(notes_hash[header_note.note_id()] != null) {
      header_note.id++;
    }
-   header_note.note_id = "note_"+header_note.id;
-   notes_hash[header_note.note_id] = header_note;
+   notes_hash[header_note.note_id()] = header_note;
    make_a_note(header_note);
 }
 
 function body_note(slide) {
-  var body_note = Note();
+  var body_note = new Note();
    body_note.top = 220;
    body_note.left = 0;
    body_note.width = slideWidth;
    body_note.height = slideHeight - body_note.top;
    body_note.content = "p(pink). paragraphs here";
    body_note.slide_id = "slide_"+slide.id;
-   while(notes_hash[body_note.id] != null) {
+   while(notes_hash[body_note.note_id()] != null) {
      body_note.id++;
    }
-   body_note.note_id = "note_"+body_note.id;
-   notes_hash[body_note.note_id] = body_note;
+   notes_hash[body_note.note_id()] = body_note;
    make_a_note(body_note);
 }
 
