@@ -119,6 +119,7 @@ $(function() {
          make_a_note(note);
          save_notes();
     }
+    clear_borders();
     save_order();
     save_slides();
   });
@@ -313,11 +314,15 @@ function codingMode(e) {
     $("#editor").hide(e);
     $(".current").addClass("zoomed_in_slide").removeClass("zoomed_out_slide");
     $(".slide").addClass("slide_transition");
+    $(".controlbar").show();
+    $("#slide_options").show();
   } else {
     $(".presentation").addClass("coding_mode");
     $("#editor").show(e);
     $(".current").removeClass("zoomed_in_slide").addClass("zoomed_out_slide");
     $(".slide").removeClass("slide_transition");
+    $(".controlbar").hide();
+    $("#slide_options").hide();
   }
 }
 function presentationMode() {
@@ -445,7 +450,10 @@ function create_canvas(slide) {
   set_canvas(slide);
 }
 function set_canvas(slide) {
-  //var paper = $("#"+slide.raphael_id).find(".canvas");
+  set_d3(slide);
+  //set_raphael(slide);
+}
+function set_d3(slide) {
   var paper = d3_papers[slide.id];
   $("#slide_"+slide.id+" .canvas").html("");
   try {
@@ -454,7 +462,16 @@ function set_canvas(slide) {
     alert(e.message || e);
   }
 }
+function set_raphael(slide) {
+  var paper = raphael_papers[slide.id];
+  paper.clear();
+  try {
+    (new Function("paper", "window", "document", slide.code ) ).call(paper, paper);
+  } catch (e) {
+    alert(e.message || e);
+  }
 
+}
 function Note(I) {
   I = I || {}
 
