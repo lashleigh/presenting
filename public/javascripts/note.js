@@ -58,8 +58,8 @@ $(function() {
   });
   $("#delete_current").live("click", function() {
     var current = $(".current");
-    var id = current.attr("id").replace("slide", "raphael");
-    var box_id = id.replace("raphael", "mini");
+    var id = current.attr("id");
+    var box_id = id.replace("slide", "mini");
     if( current.next().hasClass("slide") ) {
       current.next().addClass("current").removeClass("reduced future")
       current.next().next().addClass("future").removeClass("far-future")
@@ -74,20 +74,21 @@ $(function() {
     delete slides_hash[id];
     save_slides();
     $("#"+box_id).remove();
+    delete_inactive_notes();
   });
   $("#duplicate_current").live("click", function() {
     var current = $(".current");
     var current_notes = $(".current .note");
-    var id = current.attr("id").replace("slide", "raphael");
-    var box_id = id.replace("raphael", "mini");
+    var id = current.attr("id");
+    var box_id = id.replace("slide", "mini");
     var slide = Slide();
-    var hash_id = slide.raphael_id;
+    var hash_id = "slide_"+slide.id;
     slide.code = slides_hash[id].code;
     slides_hash[hash_id] = slide;
     
     var box_index = $("#"+box_id).index();
     //$("#boxes").append(box_html(slide));
-    order.splice(box_index+1, 0, slide.raphael_id); //Inserts the duplicate after the original
+    order.splice(box_index+1, 0, "slide_"+slide.id); //Inserts the duplicate after the original
     $(slide_html(slide)).insertAfter(current);
     $(box_html(slide)).insertAfter($("#"+box_id))
     $("#slide_"+slide.id).addClass("current")
@@ -113,7 +114,6 @@ $(function() {
          note.slide_id = hash_id;
          while(notes_hash["note_"+note.id] != null) { 
            note.id++; 
-           console.log(note.id);
          }
          notes_hash[note.note_id] = note;
          make_a_note(note);
@@ -123,17 +123,11 @@ $(function() {
     save_order();
     save_slides();
   });
-  $(".canvas").live("dblclick", function(event) {
-    if( $($(event.target).parent()).hasClass("canvas") && $(".presentation").hasClass("editing_mode") ){
-      var raphael_id = $($(event.target).parent()).parent().attr("id");
-      new_note_from_click(event, raphael_id);
-    }
-  });
 
-  $(".raphael").live("dblclick", function(event) {
-    if( $($(event.target).parent()).hasClass("raphael") && $(".presentation").hasClass("editing_mode")){
-      var raphael_id = $(event.target).parent().attr("id");
-      new_note_from_click(event, raphael_id);
+  $(".notes_container").live("dblclick", function(event) {
+    var parent_id = $($(event.target).parent()).attr("id");
+    if( parent_id.split("_")[0] == "slide") {
+      new_note_from_click(event, parent_id);
     }
   });
 
@@ -276,7 +270,7 @@ function update_slide_order(item) {
   var new_order = $("#boxes").sortable('toArray');
   code_editor.setCode("");
   for(var i = 0; i < new_order.length; i++) {
-    order[i] = new_order[i].replace("mini", "raphael");
+    order[i] = new_order[i].replace("mini", "slide");
   }
   //$(".slides").html('<button id="save_slideshow">Save</button>');
   $(".slides .slide").remove();
@@ -386,7 +380,7 @@ function go_to_next() {
     current.addClass("reduced past").removeClass("current").addClass("zoomed_in_slide").removeClass("zoomed_out_slide") 
 
     var slide = Slide();
-    var hash_id = slide.raphael_id;
+    var hash_id = "slide_"+slide.id;
     $(".slides").append( slide_html(slide) );
     slides_hash[hash_id] = slide;
     $("#slide_"+slide.id).addClass("current")
@@ -398,7 +392,7 @@ function go_to_next() {
 
     // Update thumbnails and order arry to contain the new slide
     $("#boxes").append(box_html(slide));
-    order.push(slide.raphael_id);
+    order.push("slide_"+slide.id);
     save_order();
 
     if( $(".presentation").hasClass("coding_mode")) {
@@ -438,22 +432,21 @@ function Slide(I) {
 
     I.id = (new Date()).getTime();
     I.code = ""; 
-    I.raphael_id = "raphael_"+I.id;
    
     return I;
 }
 
 function create_canvas(slide) {
-  d3_papers[slide.id] = d3.select("#"+slide.raphael_id).append("div").attr("class", "canvas");
-  //raphael_papers[slide.id] = Raphael(slide.raphael_id, 900, 700), dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
+  d3_papers[slide.id] = d3.select("#slide_"+slide.id+" .d3_container").append("div").attr("class", "canvas");
+  var raphael_id = "raphael_"+slide.id;
+  raphael_papers[slide.id] = Raphael(raphael_id, 900, 700);//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
  
   set_canvas(slide);
 }
 function set_canvas(slide) {
-  set_d3(slide);
-  //set_raphael(slide);
+  set_raphael(slide);
 }
-function set_d3(slide) {
+/*function set_d3(slide) {
   var paper = d3_papers[slide.id];
   $("#slide_"+slide.id+" .canvas").html("");
   try {
@@ -461,7 +454,7 @@ function set_d3(slide) {
   } catch (e) {
     alert(e.message || e);
   }
-}
+}*/
 function set_raphael(slide) {
   var paper = raphael_papers[slide.id];
   paper.clear();
@@ -486,17 +479,17 @@ function Note(I) {
   I.content = "p{color:red;}. Placeholder";
   return I;
 }
-function new_note_from_click(event, raphael_id) {
+function new_note_from_click(event, parent_id) {
   var n = Note();
-  n.slide_id = raphael_id;
+  n.slide_id = parent_id;
   n.top = event.offsetY;
   n.left = event.offsetX;
-  $("#"+n.slide_id).append(note_html(n));
+  $("#"+parent_id+" .notes_container").append(note_html(n));
   notes_hash[n.note_id] = n;
   save_notes();
 }
 function make_a_note(note) {
-  $("#"+note.slide_id).append(note_html(note));
+  $("#"+note.slide_id+" .notes_container").append(note_html(note));
 }
 function note_html(note) {
     return '<div id="note_'+note.id+'" class="note editable" style="'+get_style(note)+'">'+
@@ -506,7 +499,9 @@ function note_html(note) {
 }
 function slide_html(slide) {
     return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
-              '<div id="'+slide.raphael_id+'" class="raphael"> </div>'+
+              '<div id="d3_'+slide.id+'" class="d3_container"> </div>'+
+              '<div id="raphael_'+slide.id+'" class="raphael_container"> </div>'+
+              '<div class="notes_container"> </div>'+
               '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
            '</div>'
 }
@@ -550,7 +545,7 @@ function make_slides() {
       var slide = Slide();
       $(".slides").append( slide_html(slide) );
       create_canvas(slide);
-      slides_hash[slide.raphael_id] = slide;
+      slides_hash["slide_"+slide.id] = slide;
     }
   }
 }
@@ -607,7 +602,7 @@ function save_and_run_code() {
   set_canvas(slides_hash[extract_id($(".current"))])
 }
 function extract_id(selector) {
-  return $(selector).find(".raphael").attr("id");
+  return $(selector).attr("id");
 }
 
 function extract_note_id(selector) {
@@ -620,4 +615,18 @@ function get_id() {
   } else {
     return null;
   }
+}
+
+function delete_inactive_notes() {
+  for(n in notes_hash) { 
+    if( (order).indexOf(notes_hash[n].slide_id) == -1) { 
+      delete notes_hash[n];
+    }
+  }
+}
+
+function change_raphael_to_slide() {
+  for(var s in slides_hash) { slides_hash[s.replace("raphael", "slide")] = slides_hash[s];}
+  for(var s in slides_hash) { if(s.split("_")[0]=="raphael") { delete slides_hash[s];}}
+  for(var i in order) {var id = order[i]; order[i] = id.replace("raphael", "slide");}
 }
