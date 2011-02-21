@@ -3,7 +3,7 @@ var code_editor;
 var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
-var slides_hash = {}, notes_hash = {}, d3_papers = {}, raphael_papers = {};
+var slides_hash = {}, notes_hash = {}, raphael_papers = {}, d3_papers = {};
 $(function() {
 
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
@@ -427,43 +427,32 @@ function setCurrent(index) {
   $(".box").css("background", "white");
   $("#"+mini).css("background", "yellow");
 }
-function Slide(I) {
-    I = I || {}
-
-    I.id = (new Date()).getTime();
-    I.code = ""; 
-   
-    return I;
-}
-
 function create_canvas(slide) {
-  d3_papers[slide.id] = d3.select("#slide_"+slide.id+" .d3_container").append("div").attr("class", "canvas");
+  d3_papers[slide.id] = d3.select("#d3_"+slide.id);
   var raphael_id = "raphael_"+slide.id;
   raphael_papers[slide.id] = Raphael(raphael_id, 900, 700);//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
  
   set_canvas(slide);
 }
 function set_canvas(slide) {
-  set_raphael(slide);
-}
-/*function set_d3(slide) {
-  var paper = d3_papers[slide.id];
-  $("#slide_"+slide.id+" .canvas").html("");
-  try {
-    (new Function("paper", "window", "document", slide.code ) ).call(paper, paper);
-  } catch (e) {
-    alert(e.message || e);
-  }
-}*/
-function set_raphael(slide) {
   var paper = raphael_papers[slide.id];
+  var d3_paper = d3_papers[slide.id];
   paper.clear();
+  $("#d3_"+slide.id).empty();
   try {
-    (new Function("paper", "window", "document", slide.code ) ).call(paper, paper);
+    (new Function("paper", "d3_paper", "window", "document", slide.code ) ).call(paper, paper, d3_paper);
   } catch (e) {
     alert(e.message || e);
   }
+}
+function Slide(I) {
+    I = I || {}
 
+    I.id = (new Date()).getTime();
+    I.code = '// You can access raphael using \'paper\' by default\n'+ 
+             '// paper.circle(100, 100, 100)\n'+
+             '// You can access d3 using d3_paper\n';
+    return I;
 }
 function Note(I) {
   I = I || {}
@@ -629,4 +618,7 @@ function change_raphael_to_slide() {
   for(var s in slides_hash) { slides_hash[s.replace("raphael", "slide")] = slides_hash[s];}
   for(var s in slides_hash) { if(s.split("_")[0]=="raphael") { delete slides_hash[s];}}
   for(var i in order) {var id = order[i]; order[i] = id.replace("raphael", "slide");}
+}
+function change_note_slide_id() {
+  for(var n in notes_hash) { var s_id = notes_hash[n].slide_id; notes_hash[n].slide_id = s_id.replace("raphael", "slide");}
 }
