@@ -242,6 +242,8 @@ function codingMode(e) {
     $(".slide").addClass("slide_transition");
     $(".controlbar").show();
     $("#slide_options").show();
+    $(".slide").css('-webkit-transform',"");
+    $(".slide").css('margin-right', "");
   } else {
     $(".presentation").addClass("coding_mode");
     $("#editor").show(e);
@@ -249,6 +251,11 @@ function codingMode(e) {
     $(".slide").removeClass("slide_transition");
     $(".controlbar").hide();
     $("#slide_options").hide();
+
+    var scale = $("#face-rounded-border").val() / 100;
+    var margin_right = (-1)*(slideWidth*(1-scale)/2);
+    $(".current").css('-webkit-transform','scale('+scale+')');
+    $(".current").css('margin-right', margin_right+'px');
   }
 }
 function presentationMode() {
@@ -465,4 +472,15 @@ function delete_inactive_notes() {
       delete notes_hash[n];
     }
   }
+}
+
+function handleCorner(event) {
+    var border = $("#face-rounded-border").val();
+    var scale = border / 100;
+    var margin_right = (-1)*(slideWidth*(1-scale)/2);
+    var exact_scale = parseFloat($($(".current").css("-webkit-transform").split(","))[0].split("(")[1]);
+    var editor_width = screen.availWidth - 10 - slideWidth*exact_scale;
+    $(".current").css('-webkit-transform','scale('+scale+')');
+    $(".current").css('margin-right', margin_right+'px');
+    $("#editor").css('width', editor_width+'px');
 }

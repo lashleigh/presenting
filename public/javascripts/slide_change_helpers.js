@@ -7,7 +7,6 @@ var far_past_classes = "far-past reduced zoomed_in_slide slide_transition"
 function commonToSlideChange() {
   var id = $(".current").attr("id");
   $("#editor textarea").val(slides_hash[id].code);
-  console.log(slides_hash[id].code);
   //code_editor.setCode(slides_hash[id].code);
   set_canvas(slides_hash[id]);
   update_numbering();
@@ -24,9 +23,16 @@ function set_current(index) {
   for( var i = 0; i <= index - 2; i++) {
     $($(".slide")[i]).addClass(far_past_classes);
   }
+  $(".slide").css('-webkit-transform',"");
+  $(".slide").css('margin-right', "");
   if($(".presentation").hasClass("coding_mode")) {
     $(".slide").removeClass("slide_transition");
     $(".current").addClass("small_float_right").removeClass("zoomed_in_slide");
+    
+    var scale = $("#face-rounded-border").val() / 100;
+    var margin_right = (-1)*(slideWidth*(1-scale)/2);
+    $(".current").css('-webkit-transform','scale('+scale+')');
+    $(".current").css('margin-right', margin_right+'px');
   }
   commonToSlideChange();
 }
