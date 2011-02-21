@@ -22,7 +22,7 @@ $(function() {
     make_slides();
     make_notes();
   }
-  setCurrent(0);
+  set_current(0);
   //presentationMode();
   editingMode();
   slideWidth = $(".slide").width();
@@ -115,11 +115,12 @@ $(function() {
          while(notes_hash["note_"+note.id] != null) { 
            note.id++; 
          }
+         note.note_id = "note_"+note.id;
          notes_hash[note.note_id] = note;
          make_a_note(note);
-         save_notes();
     }
     clear_borders();
+    save_notes();
     save_order();
     save_slides();
   });
@@ -256,7 +257,7 @@ $(function() {
   $(".box").live("click", function() {
     var index = $("#"+$(this).attr("id").replace("mini", "slide")).index(".slide"); // Because of the other items in the .slides div
     $(".slide").removeClass("current future past far-future far-past reduced");
-    setCurrent(index);
+    set_current(index);
   });
   $(".controlbar").live("mouseenter", function(event) {
       $(".controlbar").css("margin-left", "0px");
@@ -278,7 +279,7 @@ function update_slide_order(item) {
   make_slides(); 
   make_notes();
   var index = $("#"+item.attr("id").replace("mini", "slide")).index(".slide");
-  setCurrent(index);
+  set_current(index);
   save_order();
   code_editor.setCode(slides_hash[extract_id($(".current"))].code);
 }
@@ -306,14 +307,14 @@ function codingMode(e) {
   if( $(".presentation").hasClass("coding_mode") ) {
     $(".presentation").removeClass("coding_mode");
     $("#editor").hide(e);
-    $(".current").addClass("zoomed_in_slide").removeClass("zoomed_out_slide");
+    $(".current").addClass("zoomed_in_slide").removeClass("small_float_right");
     $(".slide").addClass("slide_transition");
     $(".controlbar").show();
     $("#slide_options").show();
   } else {
     $(".presentation").addClass("coding_mode");
     $("#editor").show(e);
-    $(".current").removeClass("zoomed_in_slide").addClass("zoomed_out_slide");
+    $(".current").removeClass("zoomed_in_slide").addClass("small_float_right");
     $(".slide").removeClass("slide_transition");
     $(".controlbar").hide();
     $("#slide_options").hide();
@@ -339,93 +340,20 @@ function editingMode() {
     $(".controlbar").show();
 }
 function go_to_prev() {
-  var current = $(".current")
-  save_code(current);
-  if (current.prev().hasClass("slide")) {
-    set_and_run_code($(current).prev());
-    if( $(".presentation").hasClass("coding_mode") ) {
-      current.addClass("zoomed_in_slide").removeClass("zoomed_out_slide");
-      current.prev().addClass("zoomed_out_slide").removeClass("zoomed_in_slide");
-    }
-
-    current.prev().removeClass("reduced past").addClass("current")
-    current.next().removeClass("future").addClass("far-future")
-    current.addClass("reduced future").removeClass("current")
-    current.prev().prev().addClass("past").removeClass("far-past")
-
-  } else if( $(".presentation").hasClass("editing_mode")) {
+  var index = $(".current").index(".slide")-1;
+  if( index >= 0) { 
+    set_current(index);
   }
-  var mini = $(".current").attr("id").replace("slide", "mini");
-  $(".box").css("background", "white");
-  $("#"+mini).css("background", "yellow");
 }
 
 function go_to_next() {
-  var current = $(".current");
-  save_code(current);
-  if( current.next().hasClass("slide"))  {
-    set_and_run_code($(current).next());
-    if ( $(".presentation").hasClass("coding_mode") ){
-      current.addClass("zoomed_in_slide").removeClass("zoomed_out_slide");
-      current.next().addClass("zoomed_out_slide").removeClass("zoomed_in_slide");
-    }
-    current.next().removeClass("future reduced").addClass("current")
-    current.prev().removeClass("past").addClass("far-past")
-    current.next().next().addClass("future reduced").removeClass("far-future")
-    current.addClass("reduced past").removeClass("current") 
-
-  } else if ( $(".presentation").hasClass("editing_mode") ) {
-    // Create Slide and give it two notes
-    current.prev().removeClass("past").addClass("far-past")
-    current.addClass("reduced past").removeClass("current").addClass("zoomed_in_slide").removeClass("zoomed_out_slide") 
-
-    var slide = Slide();
-    var hash_id = "slide_"+slide.id;
-    $(".slides").append( slide_html(slide) );
-    slides_hash[hash_id] = slide;
-    $("#slide_"+slide.id).addClass("current")
-    save_slides();
-    $("#editor textarea").val(slides_hash[hash_id].code);
-    code_editor.setCode(slides_hash[hash_id].code);
-    create_canvas(slide);
-    set_and_run_code($(".current"));
-
-    // Update thumbnails and order arry to contain the new slide
-    $("#boxes").append(box_html(slide));
-    order.push("slide_"+slide.id);
-    save_order();
-
-    if( $(".presentation").hasClass("coding_mode")) {
-      current.next().addClass("zoomed_out_slide").removeClass("zoomed_in_slide slide_transition");
-    }
-    // Autopopulate with two placeholder notes.    
-    header_note(slide);
-    body_note(slide);
-    clear_borders();
-    save_notes();
-  };
-  var mini = $(".current").attr("id").replace("slide", "mini");
-  $(".box").css("background", "white");
-  $("#"+mini).css("background", "yellow");
-  set_and_run_code($(".current"));
-}
-
-function setCurrent(index) {
-  $($(".slide")[index]).addClass("current")
-  $($(".slide")[index+1]).addClass("reduced future")
-  $($(".slide")[index-1]).addClass("reduced past")
-  for( var i = 2; i < $(".slide").length; i++) {
-    $($(".slide")[index+i]).addClass("reduced far-future")
+  var index = $(".current").index(".slide")+1;
+  if( index < $(".slide").size()) { 
+    set_current(index);
+  } 
+  else if ( $(".presentation").hasClass("editing_mode") ) {
+    create_new_slide_at_end();
   }
-  for( var i = 0; i <= index - 2; i++) {
-    $($(".slide")[i]).addClass("reduced far-past")
-  }
-  var id = extract_id( $(".current"));
-  $("#editor textarea").val(slides_hash[id].code);
-  set_canvas(slides_hash[id]);
-  var mini = $(".current").attr("id").replace("slide", "mini");
-  $(".box").css("background", "white");
-  $("#"+mini).css("background", "yellow");
 }
 function create_canvas(slide) {
   d3_papers[slide.id] = d3.select("#d3_"+slide.id);
@@ -612,13 +540,4 @@ function delete_inactive_notes() {
       delete notes_hash[n];
     }
   }
-}
-
-function change_raphael_to_slide() {
-  for(var s in slides_hash) { slides_hash[s.replace("raphael", "slide")] = slides_hash[s];}
-  for(var s in slides_hash) { if(s.split("_")[0]=="raphael") { delete slides_hash[s];}}
-  for(var i in order) {var id = order[i]; order[i] = id.replace("raphael", "slide");}
-}
-function change_note_slide_id() {
-  for(var n in notes_hash) { var s_id = notes_hash[n].slide_id; notes_hash[n].slide_id = s_id.replace("raphael", "slide");}
 }
