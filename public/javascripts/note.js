@@ -56,73 +56,8 @@ $(function() {
       content: content }, function(result, txtstatus) {
       });
   });
-  $("#delete_current").live("click", function() {
-    var current = $(".current");
-    var id = current.attr("id");
-    var box_id = id.replace("slide", "mini");
-    if( current.next().hasClass("slide") ) {
-      current.next().addClass("current").removeClass("reduced future")
-      current.next().next().addClass("future").removeClass("far-future")
-    } else if ( current.prev().hasClass("slide") ) {
-      current.prev().addClass("current").removeClass("reduced past")
-      current.prev().prev().addClass("past").removeClass("far-past")
-    }
-    current.remove();
-    var box_index = $("#"+box_id).index();
-    order.splice(box_index, 1);
-    save_order();
-    delete slides_hash[id];
-    save_slides();
-    $("#"+box_id).remove();
-    delete_inactive_notes();
-    set_and_run_code($(".current"));
-  });
-  $("#duplicate_current").live("click", function() {
-    var current = $(".current");
-    var current_notes = $(".current .note");
-    var id = current.attr("id");
-    var box_id = id.replace("slide", "mini");
-    var slide = new Slide();
-    var hash_id = slide.slide_id();
-    slide.code = slides_hash[id].code;
-    slides_hash[hash_id] = slide;
-    
-    var box_index = $("#"+box_id).index();
-    //$("#boxes").append(box_html(slide));
-    order.splice(box_index+1, 0, "slide_"+slide.id); //Inserts the duplicate after the original
-    $(slide_html(slide)).insertAfter(current);
-    $(box_html(slide)).insertAfter($("#"+box_id))
-    $("#slide_"+slide.id).addClass("current")
-    current.removeClass("current").addClass("past reduced");
-    current.prev().removeClass("past").addClass("far-past")
-
-    $("#editor textarea").val(slides_hash[hash_id].code);
-    create_canvas(slide);
-    set_and_run_code($(".current"));
-
-    // Duplication of notes is trickier
-    var number_of_notes = current_notes.size()
-    for(var i = 0; i < number_of_notes; i++) {
-      var note = new Note();
-      var copy_from_id = $(current_notes[i]).attr("id");
-      var copied_note = notes_hash[copy_from_id];
-         note.top = copied_note.top;
-         note.left = copied_note.left;
-         note.width = copied_note.width;
-         note.height = copied_note.height;
-         note.content = copied_note.content;
-         note.slide_id = hash_id;
-         while(notes_hash[note.note_id()] != null) { 
-           note.id++; 
-         }
-         notes_hash[note.note_id()] = note;
-         make_a_note(note);
-    }
-    clear_borders();
-    save_notes();
-    save_order();
-    save_slides();
-  });
+  $("#delete_current").live("click", function() { delete_current_slide(); })
+  $("#duplicate_current").live("click", function() { duplicate_current_slide(); })
 
   $(".notes_container").live("dblclick", function(event) {
     var parent_id = $($(event.target).parent()).attr("id");
@@ -147,7 +82,7 @@ $(function() {
     notes_hash[note_id].content = edit_area_content;
     if(notes_hash[note_id].content == "") { 
       delete notes_hash[note_id]; 
-      $(this).hide();   
+      $(this).empty();   
     }
     save_notes();
     prettify();
