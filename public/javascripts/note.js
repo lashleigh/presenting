@@ -22,15 +22,12 @@ $(function() {
     make_slides();
     make_notes();
   }
-  set_current(0);
-  //presentationMode();
-  editingMode();
   slideWidth = $(".slide").width();
   slideHeight = $(".slide").height();
 
-  var code_id = document.getElementById('code');
+  var code_id = document.getElementById('code_mirror_textarea');
   code_editor = new CodeMirror.fromTextArea(code_id, {
-    content: slides_hash[extract_id($(".current"))].code,
+    content: slides_hash[order[0]].code,
     parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
     stylesheet: "/javascripts/codemirror/css/jscolors.css",
     path: "/javascripts/codemirror/js/",
@@ -39,7 +36,12 @@ $(function() {
     height: "100%",
     saveFunction: function() {save_and_run_code();}
   });
-
+  
+  setTimeout( function() {
+    set_current(0);
+    //presentationMode();
+    editingMode();
+  }, 250);
   $("#save_slideshow").live("click", function(event) {
     var slideshow_hash = {};
     save_notes();
@@ -82,7 +84,7 @@ $(function() {
     notes_hash[note_id].content = edit_area_content;
     if(notes_hash[note_id].content == "") { 
       delete notes_hash[note_id]; 
-      $(this).empty();   
+      $(this).remove();   
     }
     save_notes();
     prettify();
@@ -300,30 +302,6 @@ function set_canvas(slide) {
     alert(e.message || e);
   }
 }
-/*function Slide(I) {
-    I = I || {}
-
-    I.id = (new Date()).getTime();
-    I.code = '// You can access raphael using \'paper\' by default\n'+ 
-             '// paper.circle(100, 100, 100)\n'+
-             '// You can access d3 using d3_paper\n';
-    return I;
-}
-function Note(I) {
-  I = I || {}
-
-  I.active = true;
-
-  I.id = (new Date()).getTime();
-  I.note_id = "note_"+I.id;
-  I.slide_id;
-  
-  I.top; I.left; I.width = slideWidth/3; I.height = slideHeight/4;
-
-  I.content = "p{color:red;}. Placeholder";
-  return I;
-}
-*/
 var Note = function() {
   this.id = (new Date()).getTime();
   this.slide_id;

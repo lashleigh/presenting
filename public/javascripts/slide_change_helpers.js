@@ -7,7 +7,8 @@ var far_past_classes = "far-past reduced zoomed_in_slide slide_transition"
 function commonToSlideChange() {
   var id = $(".current").attr("id");
   $("#editor textarea").val(slides_hash[id].code);
-  //code_editor.setCode(slides_hash[id].code);
+  console.log(slides_hash[id].code);
+  code_editor.setCode(slides_hash[id].code);
   set_canvas(slides_hash[id]);
   update_numbering();
 }
@@ -37,6 +38,7 @@ function update_numbering() {
   var mini = $(".current").attr("id").replace("slide", "mini");
   $(".box").css("background", "white");
   $("#"+mini).css("background", "yellow");
+  //set_and_run_code($(".current"));
 }
 function create_new_slide_at_end() {
   // Create Slide
@@ -44,7 +46,7 @@ function create_new_slide_at_end() {
   $(".slides").append( slide_html(slide) );
   slides_hash[slide.slide_id()] = slide;
   $(".slide").removeClass("current")
-  $("#slide_"+slide.id).addClass("current")
+  $("#"+slide.slide_id()).addClass("current")
   create_canvas(slide);
   save_slides();
 
@@ -74,11 +76,10 @@ function duplicate_current_slide() {
   slides_hash[hash_id] = slide;
   
   var box_index = $("#"+box_id).index();
-  //$("#boxes").append(box_html(slide));
   order.splice(box_index+1, 0, "slide_"+slide.id); //Inserts the duplicate after the original
   $(slide_html(slide)).insertAfter(current);
   $(box_html(slide)).insertAfter($("#"+box_id))
-  $("#slide_"+slide.id).addClass("current")
+  $("#"+slide.slide_id()).addClass("current")
   current.removeClass("current").addClass("past reduced");
   current.prev().removeClass("past").addClass("far-past")
 
