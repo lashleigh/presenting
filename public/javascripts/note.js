@@ -75,6 +75,7 @@ $(function() {
     save_slides();
     $("#"+box_id).remove();
     delete_inactive_notes();
+    set_and_run_code($(".current"));
   });
   $("#duplicate_current").live("click", function() {
     var current = $(".current");
@@ -96,7 +97,6 @@ $(function() {
     current.prev().removeClass("past").addClass("far-past")
 
     $("#editor textarea").val(slides_hash[hash_id].code);
-    code_editor.setCode(slides_hash[hash_id].code);
     create_canvas(slide);
     set_and_run_code($(".current"));
 
