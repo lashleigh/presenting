@@ -63,8 +63,8 @@ $(function() {
 
   $(".notes_container").live("dblclick", function(event) {
     var parent_id = $($(event.target).parent()).attr("id");
-    if( parent_id.split("_")[0] == "slide") {
-      new_note_from_click(event, parent_id);
+    if( parent_id.split("_")[0] == "raphael") {
+      new_note_from_click(event, parent_id.replace("raphael", "slide"));
     }
   });
 
@@ -343,8 +343,7 @@ function note_html(note) {
 function slide_html(slide) {
     return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
               '<div id="d3_'+slide.id+'" class="d3_container"> </div>'+
-              '<div id="raphael_'+slide.id+'" class="raphael_container"> </div>'+
-              '<div class="notes_container"> </div>'+
+              '<div id="raphael_'+slide.id+'" class="raphael_container notes_container"> </div>'+
               '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
            '</div>'
 }
