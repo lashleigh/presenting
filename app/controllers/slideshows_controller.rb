@@ -1,6 +1,6 @@
 class SlideshowsController < ApplicationController
   def index
-    @slideshow = Slideshow.find('0')
+    @slideshow = Slideshow.find('4')
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @slideshow }
