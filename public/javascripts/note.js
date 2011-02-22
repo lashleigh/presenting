@@ -1,4 +1,5 @@
 var res_start;
+var scale = 0.7;
 var code_editor;
 var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
@@ -103,28 +104,14 @@ $(function() {
       drag: function(event, ui) {
         show_borders_this_red(this);
         $(this).css("opacity", 0.6);
-        var thisWidth = parseInt($(this).css("width"));
-        var thisHeight = parseInt($(this).css("height"));
-        uiLeft = ui.position.left;
-        uiTop = ui.position.top;
-        if( ui.position.left+thisWidth >= slideWidth) {
-          uiLeft = slideWidth - thisWidth;
-        }
-        if( uiTop + thisHeight >= slideHeight ) {
-          uiTop = slideHeight - thisHeight;
-        }
-        $(this).css("left", uiLeft+"px");
-        $(this).css("top", uiTop+"px");
       },
       stop: function(event, ui) {
-        $(this).css("left", uiLeft+"px");
-        $(this).css("top", uiTop+"px");
         $(this).css("opacity", 1.0);
         clear_borders();
         grey_border(this);
         var id = extract_note_id(this);
-        notes_hash[id].top = uiTop;
-        notes_hash[id].left = uiLeft;
+        notes_hash[id].top = ui.position.top;
+        notes_hash[id].left = ui.position.left;
         save_notes();
       }
     });
@@ -132,7 +119,6 @@ $(function() {
 
  $(".editable").livequery( function() {
     $(this).resizable({
-      //grid: [460, 290], there is no snap tolerance it just makes the resizing space discrete
       handles: 'ne, nw, se, sw, n, e, s, w',
       containment: $(this).parent(),
       resize: function(event, ui) {
@@ -181,6 +167,9 @@ $(function() {
 
   $(document).keydown( function(e) {
     if( $(e.srcElement).hasClass("edit_area") || $(e.srcElement).hasClass("code")) { 
+      if(e.keyCode == 27) {
+        $(".editable").focusout();
+      }
     } else {
       handleKeys(e); 
     }
@@ -192,6 +181,10 @@ $(function() {
         update_slide_order();
       }
     });    
+  });
+  $(".expose").live("dblclick", function(e) {
+    var index = $(this).index(".expose");
+    toggle_expose(index, e);
   });
 });
 
@@ -216,33 +209,38 @@ function handleKeys(e) {
    case 65: //a
      codingMode(e); break;
    case 83: //s
-     toggle_expose(); break;
+     toggle_expose(0, e); break;
   }
 }
 function codingMode(e) {
   // It was simpler to just toggle but this seems safer
   if( $(".presentation").hasClass("coding_mode") ) {
-    $(".presentation").removeClass("coding_mode");
-    $("#editor").hide(e);
-    $(".current").addClass("zoomed_in_slide").removeClass("small_float_right");
-    $(".slide").addClass("slide_transition");
-    $(".controlbar").show();
-    $("#slide_options").show();
-    $(".slide").css('-webkit-transform',"");
-    $(".slide").css('margin-right', "");
+    exit_coding_mode(e);
   } else {
-    $(".presentation").addClass("coding_mode");
-    $("#editor").show(e);
-    $(".current").removeClass("zoomed_in_slide").addClass("small_float_right");
-    $(".slide").removeClass("slide_transition");
-    $(".controlbar").hide();
-    $("#slide_options").hide();
-
-    var scale = $("#scale-slider").val() / 100;
-    var margin_right = (-1)*(slideWidth*(1-scale)/2);
-    $(".current").css('-webkit-transform','scale('+scale+')');
-    $(".current").css('margin-right', margin_right+'px');
+    begin_coding_mode(e);
   }
+}
+function exit_coding_mode(e) {
+  $(".presentation").removeClass("coding_mode");
+  $("#editor").hide(e);
+  $(".current").addClass("zoomed_in_slide").removeClass("small_float_right");
+  $(".slide").addClass("slide_transition");
+  $("#slide_options").show();
+  $(".slide").css('-webkit-transform',"");
+  $(".slide").css('margin-right', "");
+}
+
+function begin_coding_mode(e) {
+  $(".presentation").addClass("coding_mode");
+  $("#editor").show(e);
+  $(".current").removeClass("zoomed_in_slide").addClass("small_float_right");
+  $(".slide").removeClass("slide_transition");
+  $("#slide_options").hide();
+
+  scale = $("#scale-slider").val() / 100;
+  var margin_right = (-1)*(slideWidth*(1-scale)/2);
+  $(".current").css('-webkit-transform','scale('+scale+')');
+  $(".current").css('margin-right', margin_right+'px');
 }
 function presentationMode() {
     clear_borders();
@@ -252,7 +250,6 @@ function presentationMode() {
     $(".note").removeClass("editable");
     $(".note").draggable("disable");
     $(".note").resizable("disable");
-    $(".controlbar").hide();
 }
 function editingMode() {
     $(".presentation").addClass("editing_mode");
@@ -261,7 +258,6 @@ function editingMode() {
     $(".note").addClass("editable");
     $(".note").draggable("enable");
     $(".note").resizable("enable");
-    $(".controlbar").show();
 }
 function go_to_prev() {
   var index = $(".current").index(".slide")-1;
@@ -348,6 +344,7 @@ function make_notes() {
   }
   else { notes_hash = {}; }
   clear_borders();
+  prettify();
 }
 
 function make_slides() {
@@ -455,22 +452,22 @@ function delete_inactive_notes() {
 
 function handleCorner(event) {
     var border = $("#scale-slider").val();
-    var scale = border / 100;
+    scale = border / 100.0;
     var margin_right = (-1)*(slideWidth*(1-scale)/2);
-    var exact_scale = parseFloat($($(".current").css("-webkit-transform").split(","))[0].split("(")[1]);
-    var editor_width = screen.availWidth - 10 - slideWidth*exact_scale;
+    var editor_width = screen.availWidth - 10 - slideWidth*scale;
     $(".current").css('-webkit-transform','scale('+scale+')');
     $(".current").css('margin-right', margin_right+'px');
     $("#editor").css('width', editor_width+'px');
 }
-function toggle_expose() {
+function toggle_expose(index, e) {
   if( $(".presentation").hasClass("grid_layout")) {
     $(".presentation").removeClass("grid_layout");
     $(".expose").unwrap();
     $(".slide").unwrap('<div class="expose" />');
-    set_current(0);
+    set_current(index);
     $(".slides").css("overflow", "hidden");
   } else {
+    exit_coding_mode(e);
     presentationMode();
     $(".presentation").addClass("grid_layout");
     $(".slide").wrap('<div class="expose" />');
