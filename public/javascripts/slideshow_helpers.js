@@ -1,15 +1,3 @@
-function handleCorner(event) {
-    var border = $("#scale-slider").val();
-    var scale = border / 100;
-    var width = $(".current").width();
-    var margin_right = (-1)*(width*(1-scale)/2);
-    var exact_scale = parseFloat($($(".current").css("-webkit-transform").split(","))[0].split("(")[1]);
-    var editor_width = screen.availWidth - 10 - $(".current").width()*exact_scale;
-    $(".current").css('-webkit-transform','scale('+scale+')');
-    $(".current").css('margin-right', margin_right+'px');
-    $("#editor").css('width', editor_width+'px');
-}
-
 // Helpers primarily related to notes
 //
 function header_note(slide) {

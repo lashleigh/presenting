@@ -458,7 +458,7 @@ function handleCorner(event) {
     var border = $("#scale-slider").val();
     scale = border / 100.0;
     var margin_right = (-1)*(slideWidth*(1-scale)/2);
-    var editor_width = screen.availWidth - 10 - slideWidth*scale;
+    var editor_width = document.width - 10 - slideWidth*scale;
     $(".current").css('-webkit-transform','scale('+scale+')');
     $(".current").css('margin-right', margin_right+'px');
     $("#editor").css('width', editor_width+'px');
