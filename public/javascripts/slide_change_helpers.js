@@ -111,6 +111,7 @@ function duplicate_current_slide() {
 
 function delete_current_slide() {
   var current = $(".current");
+  var id = current.attr("id");
   var index = current.index(".slide");
   if( current.next().hasClass("slide") ) {
     current.remove();

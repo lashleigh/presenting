@@ -214,7 +214,8 @@ function handleKeys(e) {
 }
 function codingMode(e) {
   // It was simpler to just toggle but this seems safer
-  if( $(".presentation").hasClass("coding_mode") ) {
+  if( $(".presentation").hasClass("grid_layout") ) {
+  } else if( $(".presentation").hasClass("coding_mode") ) {
     exit_coding_mode(e);
   } else {
     begin_coding_mode(e);
@@ -252,12 +253,14 @@ function presentationMode() {
     $(".note").resizable("disable");
 }
 function editingMode() {
+  if( !$(".presentation").hasClass("grid_layout") && !$(".presentation").hasClass("coding_mode") ) {
     $(".presentation").addClass("editing_mode");
     $("#save_slideshow").show();
     $("#slide_options").show();
     $(".note").addClass("editable");
     $(".note").draggable("enable");
     $(".note").resizable("enable");
+  }
 }
 function go_to_prev() {
   var index = $(".current").index(".slide")-1;
