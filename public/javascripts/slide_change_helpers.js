@@ -7,7 +7,6 @@ var far_past_classes = "far-past reduced zoomed_in_slide slide_transition"
 function commonToSlideChange() {
   var id = $(".current").attr("id");
   $("#editor textarea").val(slides_hash[id].code);
-  //code_editor.setCode(slides_hash[id].code);
   set_canvas(slides_hash[id]);
   update_numbering();
 }
@@ -39,11 +38,7 @@ function set_current(index) {
 function update_numbering() {
   for(var i=0; i< $(".slides .slide").size(); i++) {
     $($(".slide .slide_number")[i]).html(i+1);
-    $($("#boxes .box")[i]).html(i+1);
   }
-  var mini = $(".current").attr("id").replace("slide", "mini");
-  $(".box").css("background", "white");
-  $("#"+mini).css("background", "yellow");
   set_and_run_code($(".current"));
 }
 function create_new_slide_at_end() {
@@ -57,7 +52,6 @@ function create_new_slide_at_end() {
   save_slides();
 
   // Update thumbnails and order arry to contain the new slide
-  $("#boxes").append(box_html(slide));
   order.push("slide_"+slide.id);
 
   // Autopopulate with two placeholder notes.    
@@ -75,16 +69,14 @@ function duplicate_current_slide() {
   var current = $(".current");
   var current_notes = $(".current .note");
   var id = current.attr("id");
-  var box_id = id.replace("slide", "mini");
+  var index = $(".current").index(".slide")
   var slide = new Slide();
   var hash_id = slide.slide_id();
   slide.code = slides_hash[id].code;
   slides_hash[hash_id] = slide;
   
-  var box_index = $("#"+box_id).index();
-  order.splice(box_index+1, 0, "slide_"+slide.id); //Inserts the duplicate after the original
+  order.splice(index+1, 0, "slide_"+slide.id); //Inserts the duplicate after the original
   $(slide_html(slide)).insertAfter(current);
-  $(box_html(slide)).insertAfter($("#"+box_id))
   $("#"+slide.slide_id()).addClass("current")
   current.removeClass("current").addClass("past reduced");
   current.prev().removeClass("past").addClass("far-past")
@@ -130,15 +122,11 @@ function delete_current_slide() {
     // TODO What should happen if there are no slides?
   }
 
-  var id = current.attr("id");
-  var box_id = id.replace("slide", "mini");
-  var box_index = $("#"+box_id).index();
-  order.splice(box_index, 1);
+  order.splice(index, 1);
   save_order();
   
   delete slides_hash[id];
   save_slides();
-  $("#"+box_id).remove();
   delete_inactive_notes();
   set_and_run_code($(".current"));
   update_numbering();

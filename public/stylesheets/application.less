@@ -178,14 +178,14 @@ a.delete {
   top: -20px;
   right: -10px;
 }
-.controlbar ::-webkit-scrollbar, .preview ::-webkit-scrollbar, .edit_area ::-webkit-scrollbar {
+.preview ::-webkit-scrollbar, .edit_area ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-.controlbar ::-webkit-scrollbar-thumb, .preview ::-webkit-scrollbar-thumb, .edit_area ::-webkit-scrollbar-thumb {
+.preview ::-webkit-scrollbar-thumb, .edit_area ::-webkit-scrollbar-thumb {
   background-color: #FB0 !important;
 }
-.controlbar ::-webkit-scrollbar-track, .preview ::-webkit-scrollbar-track, .edit_area ::-webkit-scrollbar-track {
+.preview ::-webkit-scrollbar-track, .edit_area ::-webkit-scrollbar-track {
   -webkit-border-radius: 3px;
   border-top-left-radius: 3px 3px;
   border-top-right-radius: 3px 3px;
@@ -193,7 +193,7 @@ a.delete {
   border-bottom-left-radius: 3px 3px;
 }
 
-.controlbar ::-webkit-scrollbar-track-piece, .preview ::-webkit-scrollbar-track-piece, .edit_area ::-webkit-scrollbar-track-piece {
+.preview ::-webkit-scrollbar-track-piece, .edit_area ::-webkit-scrollbar-track-piece {
   -webkit-border-radius: 3px;
   border-top-left-radius: 3px 3px;
   border-top-right-radius: 3px 3px;
@@ -257,6 +257,10 @@ a.delete {
   -o-transform: scale(0.4); /* Opera */
   -moz-transform: scale(0.4); /* Firefox */
 }
-#sortable {
-  bottom: -50px;
+.slide_number {
+  bottom: 10px;
+  left: 10px;
+  position: absolute;
+  font-size: 14pt;
 }
+

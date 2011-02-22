@@ -62,9 +62,11 @@ $(function() {
   $("#duplicate_current").live("click", function() { duplicate_current_slide(); })
 
   $(".notes_container").live("dblclick", function(event) {
-    var parent_id = $($(event.target).parent()).attr("id");
-    if( parent_id.split("_")[0] == "raphael") {
-      new_note_from_click(event, parent_id.replace("raphael", "slide"));
+    if( $(".presentation").hasClass("editing_mode")) {
+      var parent_id = $($(event.target).parent()).attr("id");
+      if( parent_id.split("_")[0] == "raphael") {
+        new_note_from_click(event, parent_id.replace("raphael", "slide"));
+      }
     }
   });
 
@@ -92,9 +94,6 @@ $(function() {
   $(".editable").live("mouseenter", function() { grey_border(this); });
   $(".editable").live("mouseleave", function() { clear_borders();   });
 
-  $("#sortable").livequery( function() {
-    $(this).sortable();    
-  });
   $(".editable").livequery( function() {
     $(this).draggable({ 
       snap: ".note",
@@ -187,39 +186,21 @@ $(function() {
     }
   }, false);
 
-  $("#boxes").sortable({
-    stop: function(event, ui) {
-      update_slide_order(ui.item);
-    }
-  });
-
-  $(".box").live("click", function() {
-    var index = $("#"+$(this).attr("id").replace("mini", "slide")).index(".slide"); // Because of the other items in the .slides div
-    $(".slide").removeClass("current future past far-future far-past reduced");
-    set_current(index);
-  });
-  $(".controlbar").live("mouseenter", function(event) {
-      $(".controlbar").css("margin-left", "0px");
-  });
-  $(".controlbar").live("mouseleave", function(event) {
-      $(".controlbar").css("margin-left", "-160px");
+  $("#sortable").livequery( function() {
+    $(this).sortable({
+      stop: function() {
+        update_slide_order();
+      }
+    });    
   });
 });
 
-function update_slide_order(item) {
-  var new_order = $("#boxes").sortable('toArray');
-  code_editor.setCode("");
-  for(var i = 0; i < new_order.length; i++) {
-    order[i] = new_order[i].replace("mini", "slide");
+function update_slide_order() {
+  for(var i=0; i< $(".slides .slide").size(); i++) {
+    $($("#sortable .slide_number")[i]).html(i+1);
+    order[i] = $($(".slide")[i]).attr("id");
   }
-  $(".slides .slide").remove();
-  $("#boxes .box").remove();
-  make_slides(); 
-  make_notes();
-  var index = $("#"+item.attr("id").replace("mini", "slide")).index(".slide");
-  set_current(index);
   save_order();
-  code_editor.setCode(slides_hash[extract_id($(".current"))].code);
 }
 
 function handleKeys(e) {
@@ -359,17 +340,6 @@ function slide_html(slide) {
               '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
            '</div>'
 }
-function box_html(slide) {
-    //return '<div class="box app" id="mini_'+slide.id+'" style="-webkit-transform:scale(1);background:url(/images/slide_'+slide.id+'.png);">'+slide.id+'</div>'
-    /*var s = $("#slide_"+slide.id).clone();
-    s.attr("id", "mini_"+slide.id);
-    s.removeClass();
-    s.addClass("clone box app");
-    console.log(s);
-    return s;*/
-    return '<div class="box app" id="mini_'+slide.id+'">'+$(".slide").size()+'</div>'
-}
-
 function make_notes() {
   if( notes_hash != null) {
     for( n in notes_hash) {
@@ -386,14 +356,12 @@ function make_slides() {
       for(var i = 0; i < order.length; i++) {
         var slide = slides_hash[order[i]]
         $(".slides").append(slide_html(slide));
-        $("#boxes").append(box_html(slide));
         create_canvas(slide);
       }
     } else {
       for( s_id in slides_hash) {
         var slide = slides_hash[s_id];
         $(".slides").append(slide_html(slide));
-        $("#boxes").append(box_html(slide));
         create_canvas(slide);
       }
     }
