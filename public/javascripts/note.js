@@ -12,6 +12,7 @@ $(function() {
     slides_hash = slideshow_hash.slides;
     notes_hash = slideshow_hash.notes;
     order = slideshow_hash.order;
+    if(typeof order == "undefined") { read_order();}
     make_slides();
     make_notes();
     local_version = parseInt(slideshow_version)+1;
