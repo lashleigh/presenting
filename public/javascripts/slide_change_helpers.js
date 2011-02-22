@@ -107,6 +107,7 @@ function duplicate_current_slide() {
   save_order();
   save_slides();
   update_numbering();
+  prettify();
 }
 
 function delete_current_slide() {
