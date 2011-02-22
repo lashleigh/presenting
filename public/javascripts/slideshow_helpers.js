@@ -1,5 +1,5 @@
 function handleCorner(event) {
-    var border = $("#face-rounded-border").val();
+    var border = $("#scale-slider").val();
     var scale = border / 100;
     var width = $(".current").width();
     var margin_right = (-1)*(width*(1-scale)/2);

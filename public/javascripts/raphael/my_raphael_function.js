@@ -6,7 +6,11 @@ function basic_move() {
   },
   moveCircle = function (dx, dy) {
     // move will be called with dx and dy
-    this.attr({cx: this.ox + dx, cy: this.oy + dy, opacity: .5});
+    this.attr({
+      cx: this.ox + dx, 
+      cy: this.oy + dy, 
+      opacity: .5
+    });
   },
   up = function () {
     // restoring state
@@ -17,7 +21,11 @@ function basic_move() {
     this.oy = this.attr("y");
   }
   moveRect = function(dx, dy) {
-    this.attr({x: this.ox + dx, y: this.oy + dy, opacity: .5});
+    this.attr({
+      x: this.ox + dx, 
+      y: this.oy + dy, 
+      opacity: .5
+    });
   }
 }
 function randomColor() {

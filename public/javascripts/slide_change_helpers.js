@@ -29,7 +29,7 @@ function set_current(index) {
     $(".slide").removeClass("slide_transition");
     $(".current").addClass("small_float_right").removeClass("zoomed_in_slide");
     
-    var scale = $("#face-rounded-border").val() / 100;
+    var scale = $("#scale-slider").val() / 100;
     var margin_right = (-1)*(slideWidth*(1-scale)/2);
     $(".current").css('-webkit-transform','scale('+scale+')');
     $(".current").css('margin-right', margin_right+'px');

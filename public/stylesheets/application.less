@@ -239,3 +239,24 @@ a.delete {
   top: 0;
   left: 0;
 }
+.expose {
+  -webkit-transition: -webkit-transform 1s ease-out;
+  overflow:hidden;
+  width: @width*0.4;
+  height: @height*0.4;
+  margin: 20px;
+  float: left;
+  position: relative;
+}
+.gridify {
+  border: 1px solid black;
+  margin: -211px -271px;
+  float: left;
+  transform: scale(0.4);
+  -webkit-transform: scale(0.4); /* Safari and Chrome */
+  -o-transform: scale(0.4); /* Opera */
+  -moz-transform: scale(0.4); /* Firefox */
+}
+#sortable {
+  bottom: -50px;
+}
