@@ -80,7 +80,6 @@ $(function() {
   $(".editable").live("dblclick", function(event) {
     var id = $(this).attr("id");
     if( $("#"+id+" .edit_area:hidden").size()) {
-      console.log(id);
       $(".preview").show();
       $(".edit_area").hide();
       $(this).find(".preview").hide();
@@ -168,7 +167,7 @@ $(function() {
   $(".past").live("click", function() { go_to_prev(); });
 
   $(document).keydown( function(e) {
-    if( $(e.srcElement).hasClass("edit_area") ) { 
+    if( $(e.srcElement).hasClass("edit_area") && $(".edit_area").is(":visible")) { 
       if(e.keyCode == 27) {
         var id = $($(e.srcElement).parent()).attr("id");
         $("#"+id+" .edit_area").focusout();
@@ -196,7 +195,6 @@ function exit_note_and_save(note_id) {
   $(dom_id).find(".preview").html(linen($(dom_id).find(".edit_area").val()));
   $(dom_id).find(".preview").show();
   $(dom_id).find(".edit_area").hide();
-  console.log(note_id, dom_id);
   if(edit_area_content == "") { 
     $(dom_id).remove();   
     delete notes_hash[note_id]; 
