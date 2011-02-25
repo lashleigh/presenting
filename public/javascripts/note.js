@@ -1,6 +1,6 @@
-var res_start;
 var scale = 0.7;
 var code_editor;
+var which_db;
 var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
@@ -8,7 +8,7 @@ var slides_hash = {}, notes_hash = {}, raphael_papers = {}, d3_papers = {};
 $(function() {
 
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
-    console.log("using db version");
+    which_db = "using db version";
     slides_hash = slideshow_hash.slides;
     notes_hash = slideshow_hash.notes;
     order = slideshow_hash.order;
@@ -17,7 +17,7 @@ $(function() {
     make_notes();
     local_version = parseInt(slideshow_version)+1;
   } else {
-    console.log("using local version");
+    which_db = "using local version";
     read_slides();
     read_notes();
     read_order();
@@ -43,6 +43,8 @@ $(function() {
     set_current(0);
     //presentationMode();
     editingMode();
+    var editor_width = document.width - 10 - slideWidth*scale;
+    $("#editor").css('width', editor_width+'px');
     $(code_editor.win.document.body).bind("keydown", function(e) {
       if(e.keyCode == 27) {
         exit_coding_mode();
@@ -100,7 +102,7 @@ $(function() {
     $(this).draggable({ 
       snap: ".note",
       snapMode: "outer",
-      containment: $(this).parent(),
+      containment: $(this).parent(".notes_container"),
       refreshPositions: true,
       drag: function(event, ui) {
         show_borders_this_red(this);
@@ -223,23 +225,23 @@ function handleKeys(e) {
    case 69: // E
      editingMode(); break;
    case 65: //a
-     codingMode(e); break;
+     codingMode(); break;
    case 83: //s
-     toggle_expose(0, e); break;
+     toggle_expose(0); break;
   }
 }
-function codingMode(e) {
+function codingMode() {
   // It was simpler to just toggle but this seems safer
   if( $(".presentation").hasClass("grid_layout") ) {
   } else if( $(".presentation").hasClass("coding_mode") ) {
-    exit_coding_mode(e);
+    exit_coding_mode();
   } else {
-    begin_coding_mode(e);
+    begin_coding_mode();
   }
 }
-function exit_coding_mode(e) {
+function exit_coding_mode() {
   $(".presentation").removeClass("coding_mode");
-  $("#editor").hide(e);
+  $("#editor").hide('fast');
   $(".current").addClass("zoomed_in_slide").removeClass("small_float_right");
   $(".slide").addClass("slide_transition");
   $("#slide_options").show();
@@ -247,9 +249,9 @@ function exit_coding_mode(e) {
   $(".slide").css('margin-right', "");
 }
 
-function begin_coding_mode(e) {
+function begin_coding_mode() {
   $(".presentation").addClass("coding_mode");
-  $("#editor").show(e);
+  $("#editor").show('slow');
   $(".current").removeClass("zoomed_in_slide").addClass("small_float_right");
   $(".slide").removeClass("slide_transition");
   $("#slide_options").hide();
@@ -261,8 +263,7 @@ function begin_coding_mode(e) {
 }
 function presentationMode() {
     clear_borders();
-    $("#save_slideshow").hide();
-    $("#slide_options").hide();
+    $("#options").hide();
     $(".presentation").removeClass("editing_mode");
     $(".note").removeClass("editable");
     $(".note").draggable("disable");
@@ -271,8 +272,7 @@ function presentationMode() {
 function editingMode() {
   if( !$(".presentation").hasClass("grid_layout") && !$(".presentation").hasClass("coding_mode") ) {
     $(".presentation").addClass("editing_mode");
-    $("#save_slideshow").show();
-    $("#slide_options").show();
+    $("#options").show();
     $(".note").addClass("editable");
     $(".note").draggable("enable");
     $(".note").resizable("enable");
@@ -469,16 +469,15 @@ function delete_inactive_notes() {
   }
 }
 
-function handleCorner(event) {
-    var border = $("#scale-slider").val();
-    scale = border / 100.0;
+function handleCorner() {
+    scale = $("#scale-slider").val() / 100;
     var margin_right = (-1)*(slideWidth*(1-scale)/2);
     var editor_width = document.width - 10 - slideWidth*scale;
     $(".current").css('-webkit-transform','scale('+scale+')');
     $(".current").css('margin-right', margin_right+'px');
     $("#editor").css('width', editor_width+'px');
 }
-function toggle_expose(index, e) {
+function toggle_expose(index) {
   if( $(".presentation").hasClass("grid_layout")) {
     $(".presentation").removeClass("grid_layout");
     $(".expose").unwrap();
@@ -486,7 +485,7 @@ function toggle_expose(index, e) {
     set_current(index);
     $(".slides").css("overflow", "hidden");
   } else {
-    exit_coding_mode(e);
+    exit_coding_mode();
     presentationMode();
     $(".presentation").addClass("grid_layout");
     $(".slide").wrap('<div class="expose" />');

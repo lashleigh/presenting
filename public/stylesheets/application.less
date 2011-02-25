@@ -14,6 +14,10 @@ body {
   left: 0px; top: 0px;
   overflow: hidden;
 }
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+}
 p { margin: 10px; }
 .presentation {
   background: -webkit-gradient(linear, left top, left bottom, from(#444), to(black));
@@ -208,16 +212,21 @@ a.delete {
   position: absolute;
   display: block;
 }
-#save_slideshow {
-  margin-top: 5px;
+#slideshow_options{
   margin-left: 5px;
 }
-.d3_container, .raphael_container, .notes_container {
+.d3_container, .raphael_container {
   width: @width;
   height: @height;
   position: absolute;
   top: 0;
   left: 0;
+}
+.notes_containerTEST {
+  width: @width -  20px;
+  height: @height - 20px;
+  //position: absolute;
+  padding: 10px;
 }
 .expose {
   -webkit-transition: -webkit-transform 1s ease-out;
