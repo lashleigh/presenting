@@ -43,6 +43,11 @@ $(function() {
     set_current(0);
     //presentationMode();
     editingMode();
+    $(code_editor.win.document.body).bind("keydown", function(e) {
+      if(e.keyCode == 27) {
+        exit_coding_mode();
+      }
+    });
   }, 250);
   $("#save_slideshow").live("click", function(event) {
     var slideshow_hash = {};
@@ -66,7 +71,7 @@ $(function() {
   $(".notes_container").live("dblclick", function(event) {
     if( $(".presentation").hasClass("editing_mode")) {
       var parent_id = $($(event.target).parent()).attr("id");
-      if( parent_id.split("_")[0] == "raphael") {
+      if( parent_id == $(this).attr("id")) {
         new_note_from_click(event, parent_id.replace("raphael", "slide"));
       }
     }
@@ -78,21 +83,11 @@ $(function() {
     $(this).find(".preview").hide();
     $(this).find(".edit_area").show().focus();
   });
-
-  $(".editable").live("focusout", function(event) {
-    var edit_area_content = $(this).find(".edit_area").val();
-    var note_id = extract_note_id(this);
-    $(this).find(".preview").html(linen($(this).find(".edit_area").val()));
-    $(this).find(".preview").show();
-    $(this).find(".edit_area").hide();
-    notes_hash[note_id].content = edit_area_content;
-    if(notes_hash[note_id].content == "") { 
-      delete notes_hash[note_id]; 
-      $(this).remove();   
-    }
-    save_notes();
-    prettify();
+  $(".editable").live("focusout", function() { 
+      var id = $(this).attr("id");
+      exit_note_and_save(id);
   });
+
   $(".editable").live("mouseenter", function() { grey_border(this); });
   $(".editable").live("mouseleave", function() { clear_borders();   });
 
@@ -167,9 +162,10 @@ $(function() {
   $(".past").live("click", function() { go_to_prev(); });
 
   $(document).keydown( function(e) {
-    if( $(e.srcElement).hasClass("edit_area") || $(e.srcElement).hasClass("code")) { 
+    if( $(e.srcElement).hasClass("edit_area") ) { 
       if(e.keyCode == 27) {
-        $(".editable").focusout();
+        var id = $($(e.srcElement).parent()).attr("id");
+        $("#"+id).focusout();
       }
     } else {
       handleKeys(e); 
@@ -188,7 +184,20 @@ $(function() {
     toggle_expose(index, e);
   });
 });
-
+function exit_note_and_save(note_id) {
+  var dom_id = "#"+note_id;
+  var edit_area_content = $(dom_id).find(".edit_area").val();
+  $(dom_id).find(".preview").html(linen($(dom_id).find(".edit_area").val()));
+  $(dom_id).find(".preview").show();
+  $(dom_id).find(".edit_area").hide();
+  notes_hash[note_id].content = edit_area_content;
+  if(notes_hash[note_id].content == "") { 
+    $(dom_id).remove();   
+    delete notes_hash[note_id]; 
+  }
+  save_notes();
+  prettify();
+}
 function update_slide_order() {
   for(var i=0; i< $(".slides .slide").size(); i++) {
     $($("#sortable .slide_number")[i]).html(i+1);
