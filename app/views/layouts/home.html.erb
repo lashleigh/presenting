@@ -1,0 +1,49 @@
+<!DOCTYPE html><head>
+  <title>Home: Index</title>
+
+    <link rel="stylesheet/less" type="text/css" href="/stylesheets/home.less" >
+    <%= javascript_include_tag 'less-1.0.41.min.js' %>
+    <script type="text/javascript" charset="utf-8">
+            less.env = "development";
+            less.watch();
+    </script>
+
+  <%= javascript_include_tag "jquery-1.4.4.min", "jquery-ui-1.8.7.custom.min", "jquery.rails.js" %>
+  <%= javascript_include_tag 'codemirror/js/codemirror' %>
+  <%= javascript_include_tag 'codemirror/js/mirrorframe' %>
+  <%= javascript_include_tag 'prettify/prettify' %>
+  <%= javascript_include_tag 'slideshow_helpers' %>
+  <%= javascript_include_tag 'slide_change_helpers' %>
+  <%= javascript_include_tag 'jquery.livequery' %>
+  <%= javascript_include_tag 'linen' %>
+
+  <%= javascript_include_tag 'd3/d3.min' %>
+  <%= javascript_include_tag 'd3/d3.layout.min' %>
+  <%= javascript_include_tag 'd3/d3.geom.min' %>
+  <%= javascript_include_tag 'd3/stream' %>
+  
+  <%= javascript_include_tag 'raphael/raphael-min' %>
+  <%= javascript_include_tag 'raphael/g.raphael-min' %>
+  <%= javascript_include_tag 'raphael/g.bar-min' %>
+  <%= javascript_include_tag 'raphael/g.dot-min' %>
+  <%= javascript_include_tag 'raphael/g.line-min' %>
+  <%= javascript_include_tag 'raphael/g.pie-min' %>
+  <%= javascript_include_tag 'raphael/my_raphael_extensions' %>
+  <%= javascript_include_tag 'raphael/my_raphael_function' %>
+                         
+
+  <%= stylesheet_link_tag 'prettify' %>
+  <%= stylesheet_link_tag 'jquery-ui-1.8.7.custom' %>
+  <%= stylesheet_link_tag 'uiOverride' %>
+ 
+  <%= csrf_meta_tag %>
+
+</head>
+<body>
+  <p class="notice"><%= notice %></p>
+
+   <%= yield %>
+</body>
+</html>
+
+

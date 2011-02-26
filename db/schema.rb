@@ -10,20 +10,35 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110222100844) do
+ActiveRecord::Schema.define(:version => 20110226065858) do
 
-  create_table "previews", :force => true do |t|
-    t.text     "content",    :limit => 255
+  create_table "authorizations", :force => true do |t|
+    t.string   "provider"
+    t.string   "uid"
+    t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
+  create_table "previews", :force => true do |t|
+    t.text      "content"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
+  end
+
   create_table "slideshows", :force => true do |t|
-    t.string   "title"
-    t.text     "content"
+    t.string    "title"
+    t.text      "content"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
+    t.integer   "version",    :default => 0
+  end
+
+  create_table "users", :force => true do |t|
+    t.string   "name"
+    t.boolean  "admin",      :default => false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "version",    :default => 0
   end
 
 end
