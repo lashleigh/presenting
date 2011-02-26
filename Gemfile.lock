@@ -31,7 +31,6 @@ GEM
     addressable (2.2.4)
     arel (2.0.9)
     builder (2.1.2)
-    dalli (1.0.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
     faraday (0.5.6)
@@ -124,7 +123,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  dalli
   omniauth
   rails (= 3.0.3)
   sqlite3-ruby
