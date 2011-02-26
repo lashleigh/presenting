@@ -1,0 +1,4 @@
+<h1> List of all slideshows</h1>
+<% @all.each do |s| %>
+  <div> <%= link_to s.title, s%> </div>
+<% end %>

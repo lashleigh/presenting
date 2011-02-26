@@ -5,7 +5,9 @@ class HomeController < ApplicationController
   end
 
   def index
-    @slideshow = Slideshow.find('4')
+    if current_user
+      @all = Slideshow.find_all_by_user_id(current_user.id)
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @slideshow }

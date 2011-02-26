@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110226065858) do
+ActiveRecord::Schema.define(:version => 20110226072339) do
 
   create_table "authorizations", :force => true do |t|
     t.string   "provider"
@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(:version => 20110226065858) do
     t.timestamp "created_at"
     t.timestamp "updated_at"
     t.integer   "version",    :default => 0
+    t.integer   "user_id"
   end
 
   create_table "users", :force => true do |t|

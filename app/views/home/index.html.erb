@@ -7,4 +7,9 @@
     <%= link_to "Sign in with Twitter", "/auth/twitter" %>  
   <% end %>  
 </div>  
-<%= link_to 'Show', @slideshow  %>
+<% if current_user %>
+  <% @all.each do |s| %>
+    <div> <%= link_to s.title, s%> </div>
+  <% end %>
+  <%= link_to 'New', new_slideshow_path %>
+<% end %>
