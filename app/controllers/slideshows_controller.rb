@@ -44,7 +44,6 @@ class SlideshowsController < ApplicationController
   def update
     @slideshow = Slideshow.find(params[:id])
     if current_user and @slideshow.user_id = current_user.id
-      @slideshow.title = params[:title]
       @slideshow.content = params[:content]
       @slideshow.version = params[:version]
       @slideshow.save

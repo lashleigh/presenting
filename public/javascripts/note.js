@@ -61,10 +61,21 @@ $(function() {
     slideshow_hash.order = order;
     var content = JSON.stringify(slideshow_hash);
     $.post("/update", {
-      id: get_id(),
+      id: slideshow_id,
       version: local_version,
-      title: "Testing",
-      content: content }, function(result, txtstatus) {
+      content: content }, function(txtstatus, result) {
+        if(result == "Success") {
+          $("#options").after('<p id="success" style="display:none;">'+txtstatus+'</p>');
+          $("#slides_container #success").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
+            $(this).remove();
+            });
+        } else {
+          $("#options").after('<p id="failure" style="display:none;">'+txtstatus+'</p>');
+          $("#slides_container #failure").fadeIn(1500);
+          $("#slides_container #failure").bind("click", function() {
+            $(this).remove();
+            });
+        }
       });
   });
   $("#delete_current").live("click", function() { delete_current_slide(); })
@@ -453,14 +464,6 @@ function extract_note_id(selector) {
   return $(selector).attr("id");
 }
 
-function get_id() {
-  if(typeof slideshow_id != "undefined") {
-    return slideshow_id;
-  } else {
-    return null;
-  }
-}
-
 function delete_inactive_notes() {
   for(n in notes_hash) { 
     if( (order).indexOf(notes_hash[n].slide_id) == -1) { 
@@ -483,7 +486,7 @@ function toggle_expose(index) {
     $(".expose").unwrap();
     $(".slide").unwrap('<div class="expose" />');
     set_current(index);
-    $(".slides").css("overflow", "hidden");
+    $(".slides").css("overflow", "visible");
   } else {
     exit_coding_mode();
     presentationMode();
