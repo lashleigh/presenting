@@ -7,7 +7,6 @@ class HomeController < ApplicationController
   def index
     if current_user
       @all = Slideshow.find_all_by_user_id(current_user.id)
-      @covers = @all.map(&:cover)
     end
     respond_to do |format|
       format.html # show.html.erb

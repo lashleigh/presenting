@@ -366,7 +366,6 @@ function send_to_server() {
   $.post("/update", {
     id: slideshow_id,
     version: local_version,
-    cover: create_cover(),
     content: content }, function(txtstatus, result) {
       $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
       $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
@@ -418,14 +417,6 @@ function extract_id(selector) {
 
 function extract_note_id(selector) {
   return $(selector).attr("id");
-}
-function create_cover() {
-  var cover = {};
-
-  cover.slide = slides_hash[order[0]];
-  cover.height = slideHeight;
-  cover.width = slideWidth;
-  return JSON.stringify(cover);
 }
 function handleCorner() {
     scale = $("#scale-slider").val() / 100;
