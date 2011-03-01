@@ -4,25 +4,21 @@ var which_db;
 var local_version, order = [];
 var uiLeft, uiTop, uiWidth, uiHeight;
 var slideWidth, slideHeight, cylonOffset;
-var slides_hash = {}, notes_hash = {}, raphael_papers = {}, d3_papers = {};
+var slides_hash = {}, raphael_papers = {}, d3_papers = {};
 $(function() {
 
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
     which_db = "using db version";
     slides_hash = slideshow_hash.slides;
-    notes_hash = slideshow_hash.notes;
     order = slideshow_hash.order;
     if(typeof order == "undefined") { read_order();}
     make_slides();
-    make_notes();
     local_version = parseInt(slideshow_version)+1;
   } else {
     which_db = "using local version";
     read_slides();
-    read_notes();
     read_order();
     make_slides();
-    make_notes();
   }
   slideWidth = $(".slide").width();
   slideHeight = $(".slide").height();
@@ -52,24 +48,9 @@ $(function() {
     });
   }, 250);
   $("#save_slideshow").live("click", function(event) {
-    var slideshow_hash = {};
-    save_notes();
     save_slides();
     save_order();
-    slideshow_hash.slides = slides_hash;
-    slideshow_hash.notes = notes_hash;
-    slideshow_hash.order = order;
-    var content = JSON.stringify(slideshow_hash);
-    $.post("/update", {
-      id: slideshow_id,
-      version: local_version,
-      cover: create_cover(),
-      content: content }, function(txtstatus, result) {
-        $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
-        $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
-          $(this).remove();
-          });
-      });
+    send_to_server();
   });
   $("#delete_current").live("click", function() { delete_current_slide(); })
   $("#duplicate_current").live("click", function() { duplicate_current_slide(); })
@@ -117,9 +98,10 @@ $(function() {
         clear_borders();
         grey_border(this);
         var id = extract_note_id(this);
-        notes_hash[id].top = ui.position.top;
-        notes_hash[id].left = ui.position.left;
-        save_notes();
+        var parent_id = $("#"+id).parent().attr("id").replace("raphael", "slide");
+        slides_hash[parent_id].notes[id].top = ui.position.top;
+        slides_hash[parent_id].notes[id].left = ui.position.left;
+        save_slides();
       }
     });
   });
@@ -160,11 +142,12 @@ $(function() {
         clear_borders();
         grey_border(this);
         var id = extract_note_id(this);
-        notes_hash[id].top = uiTop;
-        notes_hash[id].left = uiLeft;
-        notes_hash[id].width = uiWidth;
-        notes_hash[id].height = uiHeight;
-        save_notes();
+        var parent_id = $("#"+id).parent().attr("id").replace("raphael", "slide");
+        slides_hash[parent_id].notes[id].top = uiTop;
+        slides_hash[parent_id].notes[id].left = uiLeft;
+        slides_hash[parent_id].notes[id].width = uiWidth;
+        slides_hash[parent_id].notes[id].height = uiHeight;
+        save_slides();
       }
     });
   });
@@ -197,16 +180,17 @@ $(function() {
 });
 function exit_note_and_save(note_id) {
   var dom_id = "#"+note_id;
+  var parent_id = $(dom_id).parent().attr("id").replace("raphael", "slide");
   var edit_area_content = $(dom_id).find(".edit_area").val();
   $(dom_id).find(".preview").html(linen($(dom_id).find(".edit_area").val()));
   $(dom_id).find(".preview").show();
   $(dom_id).find(".edit_area").hide();
   if(edit_area_content == "") { 
     $(dom_id).remove();   
-    delete notes_hash[note_id]; 
+    delete slides_hash[parent_id].notes[note_id]; 
   } else {
-    notes_hash[note_id].content = edit_area_content;
-    save_notes();
+    slides_hash[parent_id].notes[note_id].content = edit_area_content;
+    save_slides();
     prettify();
   }
 }
@@ -306,6 +290,7 @@ Note.prototype = {
   note_id: function() {return "note_"+this.id;}
 }
 var Slide = function() {
+  this.notes = {};
   this.id = (new Date()).getTime();
   this.code = '// You can access raphael using \'paper\' by default\n'+ 
               '// paper.circle(100, 100, 100)\n'+
@@ -322,17 +307,13 @@ function new_note_from_click(event, parent_id) {
   n.top = event.offsetY;
   n.left = event.offsetX;
   $("#"+parent_id+" .notes_container").append(note_html(n));
-  notes_hash[n.note_id()] = n;
-  save_notes();
+  slides_hash[parent_id].notes[n.note_id()] = n;
+  save_slides();
 }
-
-function make_notes() {
-  if( notes_hash != null) {
-    for( n in notes_hash) {
-        make_a_note(notes_hash[n]);
-    }
+function make_notes(slide) {
+  for( n_id in slide.notes) {
+    $("#slide_"+slide.id+" .notes_container").append(note_html(slide.notes[n_id]));
   }
-  else { notes_hash = {}; }
   clear_borders();
   prettify();
 }
@@ -344,12 +325,14 @@ function make_slides() {
         var slide = slides_hash[order[i]]
         $(".slides").append(slide_html(slide));
         create_canvas(slide);
+        make_notes(slide);
       }
     } else {
       for( s_id in slides_hash) {
         var slide = slides_hash[s_id];
         $(".slides").append(slide_html(slide));
         create_canvas(slide);
+        make_notes(slide);
       }
     }
   }
@@ -372,11 +355,25 @@ function local_name(type) {
   }
 }
 function read_slides() { slides_hash = JSON.parse(localStorage.getItem(local_name("slides"))); }
-function read_notes()  { notes_hash = JSON.parse(localStorage.getItem(local_name("notes"))); }
-function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); }
-function save_notes()  { localStorage.setItem(local_name("notes"), JSON.stringify(notes_hash));   increment_version(); }
-function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); }
+function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); send_to_server(); }
+function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); send_to_server(); }
 
+function send_to_server() {
+  var slideshow_hash = {};
+  slideshow_hash.slides = slides_hash;
+  slideshow_hash.order = order;
+  var content = JSON.stringify(slideshow_hash);
+  $.post("/update", {
+    id: slideshow_id,
+    version: local_version,
+    cover: create_cover(),
+    content: content }, function(txtstatus, result) {
+      $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
+      $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
+        $(this).remove();
+        });
+    });
+}
 
 function read_order()  { 
   order = JSON.parse(localStorage.getItem(local_name("order"))); 
@@ -409,7 +406,6 @@ function save_code(selector) {
   code_editor.save();
   var id = extract_id(selector);
   slides_hash[id].code = $("#editor textarea").val();
-  save_notes();
   save_slides();
 }
 function save_and_run_code() {
@@ -423,25 +419,10 @@ function extract_id(selector) {
 function extract_note_id(selector) {
   return $(selector).attr("id");
 }
-
-function delete_inactive_notes() {
-  for(n in notes_hash) { 
-    if( (order).indexOf(notes_hash[n].slide_id) == -1) { 
-      delete notes_hash[n];
-    }
-  }
-}
 function create_cover() {
   var cover = {};
-  var slide_1 = slides_hash[order[0]];
-  var notes_1 = [];
-  for(var n in notes_hash) {
-    if(notes_hash[n].slide_id == order[0]) {
-      notes_1.push(notes_hash[n]);
-    }
-  }
-  cover.slide = slide_1;
-  cover.notes = notes_1;
+
+  cover.slide = slides_hash[order[0]];
   cover.height = slideHeight;
   cover.width = slideWidth;
   return JSON.stringify(cover);
@@ -460,7 +441,7 @@ function toggle_expose(index) {
     $(".expose").unwrap();
     $(".slide").unwrap('<div class="expose" />');
     set_current(index);
-    $(".slides").css("overflow", "visible");
+    $(".slides").css("overflow", "hidden");
   } else {
     exit_coding_mode();
     presentationMode();

@@ -14,7 +14,6 @@
 </div>  
 <% if current_user %>
 <script type="text/javascript">
-  var covers = [<%= @covers.join(",").html_safe %>];
   var all = <%= @all.to_json.html_safe %>;
 </script>
   <div id="covers"></div>

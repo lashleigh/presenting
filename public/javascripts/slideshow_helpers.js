@@ -8,10 +8,10 @@ function header_note(slide) {
    header_note.height = 200;
    header_note.content = "h1. Header holder";
    header_note.slide_id = "slide_"+slide.id;
-   while(notes_hash[header_note.note_id()] != null) {
+   while(slide.notes[header_note.note_id()] != null) {
      header_note.id++;
    }
-   notes_hash[header_note.note_id()] = header_note;
+   slide.notes[header_note.note_id()] = header_note;
    make_a_note(header_note);
 }
 
@@ -23,10 +23,10 @@ function body_note(slide) {
    body_note.height = slideHeight - body_note.top;
    body_note.content = "p(pink). paragraphs here";
    body_note.slide_id = "slide_"+slide.id;
-   while(notes_hash[body_note.note_id()] != null) {
+   while(slide.notes[body_note.note_id()] != null) {
      body_note.id++;
    }
-   notes_hash[body_note.note_id()] = body_note;
+   slide.notes[body_note.note_id()] = body_note;
    make_a_note(body_note);
 }
 

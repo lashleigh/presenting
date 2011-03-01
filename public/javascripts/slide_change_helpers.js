@@ -59,7 +59,7 @@ function create_new_slide_at_end() {
   body_note(slide);
   clear_borders();
   save_order();
-  save_notes();
+  save_slides();
 
   var index = $(".current").index(".slide");
   set_current(index);
@@ -89,21 +89,21 @@ function duplicate_current_slide() {
   for(var i = 0; i < number_of_notes; i++) {
     var note = new Note();
     var copy_from_id = $(current_notes[i]).attr("id");
-    var copied_note = notes_hash[copy_from_id];
+    var copied_note = slides_hash[hash_id].notes[copy_from_id];
        note.top = copied_note.top;
        note.left = copied_note.left;
        note.width = copied_note.width;
        note.height = copied_note.height;
        note.content = copied_note.content;
        note.slide_id = hash_id;
-       while(notes_hash[note.note_id()] != null) { 
+       while(slides_hash[hash_id].notes[note.note_id()] != null) { 
          note.id++; 
        }
-       notes_hash[note.note_id()] = note;
+       slides_hash[hash_id].notes[note.note_id()] = note;
        make_a_note(note);
   }
   clear_borders();
-  save_notes();
+  save_slides();
   save_order();
   save_slides();
   update_numbering();
