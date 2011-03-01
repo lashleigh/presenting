@@ -1,6 +1,8 @@
 class SlideshowsController < ApplicationController
   def index
-    @all = Slideshow.all
+    six = Slideshow.find('6')
+    @all = Slideshow.all - six.to_a
+    @add_new = six.content
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @slideshow }
@@ -26,7 +28,7 @@ class SlideshowsController < ApplicationController
 
   def create 
     @slideshow = Slideshow.new(params[:slideshow])
-    @slideshow.content = Slideshow.find('1').content #params[:content]
+    @slideshow.content = generate_blank_content() 
     @slideshow.version = 20
     @slideshow.user = current_user
 
@@ -57,6 +59,10 @@ class SlideshowsController < ApplicationController
         format.xml  { render :xml => @slideshow }
       end
     end
+  end
+
+  def generate_blank_content
+    Slideshow.find('6').content
   end
 
 end

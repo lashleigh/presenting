@@ -74,14 +74,16 @@ function create_canvas(slide) {
  
   set_canvas(slide);
 }
-function set_canvas(slide) {
-  var paper = raphael_papers[slide.id];
-  var d3_paper = d3_papers[slide.id];
+function set_canvas(this_slide) {
+  var paper = raphael_papers[this_slide.id];
+  var d3_paper = d3_papers[this_slide.id];
+  var slide = $("#slide_"+this_slide.id);
   paper.clear();
-  $("#d3_"+slide.id).empty();
+  $("#d3_"+this_slide.id).empty();
   try {
-    (new Function("paper", "d3_paper", "window", "document", slide.code ) ).call(paper, paper, d3_paper);
+    (new Function("paper", "d3_paper", "slide", "window", "document", this_slide.code ) ).call(paper, paper, d3_paper, slide);
   } catch (e) {
     alert(e.message || e);
   }
 }
+

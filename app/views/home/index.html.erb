@@ -13,8 +13,9 @@
   <% end %>  
 </div>  
 <% if current_user %>
-<script type="text/javascript">
-  var all = <%= @all.to_json.html_safe %>;
-</script>
+  <script type="text/javascript">
+    var all = <%= @all.to_json.html_safe %>;
+    var add_new = <%= @add_new.to_json.html_safe %>;
+  </script>
   <div id="covers"></div>
 <% end %>

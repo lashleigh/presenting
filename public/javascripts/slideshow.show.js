@@ -3,14 +3,24 @@ var all_shows = {};
 var scale = .4;
 
 $(function() {
+  $("body").css("overflow", "auto");
   read_shows();
   for(show_id in all_shows) {
     set_initial(show_id, 0);
   }
-  add_empty_new();
+  if(typeof add_new != "undefined") {
+    add_new = JSON.parse(add_new);
+    var new_slide = add_new.slides[add_new.order[0]];
+    $("#covers").append(gridify_slide_html(new_slide))
+    create_canvas(new_slide);
+    for(n_id in new_slide.notes) {
+      make_a_note(new_slide.notes[n_id]);
+    }
+    $(".slide").last().attr("id", "slide_new");
+    $("#slide_new").wrap('<a href="/slideshows/new/" class="expose" id="new" />');
+    $("#slide_new .slide_number").remove();
+  }
   clear_borders();
-  $(".slide").removeClass("current reduced zoomed_in_slide slide_transition future far-future past far-past");
-  $(".slide").addClass("gridify");
 
   $(".notnew").live("mousemove", function(e) {
     var show_id = $(this).attr("id").split("_")[1]
@@ -25,15 +35,12 @@ $(function() {
 });
 function change_visible_slide(this_show, index) {
   var visible_slide = this_show.slides[this_show.order[index]];
-  $("#expose_"+this_show.id).empty();
-  $("#expose_"+this_show.id).append(slide_html(visible_slide));
+  $("#expose_"+this_show.id).html(gridify_slide_html(visible_slide));
   create_canvas(visible_slide);
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
   }
   clear_borders();
-  $("#slide_"+visible_slide.id).removeClass("current reduced zoomed_in_slide slide_transition future far-future past far-past");
-  $("#slide_"+visible_slide.id).addClass("gridify");
   $("#slide_"+visible_slide.id+" .slide_number").html(index);
   this_show.visible_index = index;
 }
@@ -42,7 +49,7 @@ function set_initial(show_id, index) {
   var visible_slide = this_show.slides[this_show.order[index]];
   visible_slide.visible_index = index;
   $("#expose_"+visible_slide.id).remove();
-  $("#covers").append(slide_html(visible_slide));
+  $("#covers").append(gridify_slide_html(visible_slide));
   create_canvas(visible_slide);
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
@@ -64,7 +71,11 @@ function read_shows() {
   }
 }
 
-function add_empty_new() {
-  $("#covers").append('<div id="slide_new" class="slide"><h1>New</h1></div>')
-  $("#slide_new").wrap('<a href="/slideshows/new/" class="expose" id="new" />');
+function gridify_slide_html(slide) {
+    return '<div id="slide_'+slide.id+'" class="slide gridify">'+
+              '<div id="d3_'+slide.id+'" class="d3_container"> </div>'+
+              '<div id="raphael_'+slide.id+'" class="raphael_container notes_container"> </div>'+
+              '<div class="slide_number"></div>'+
+           '</div>'
+
 }

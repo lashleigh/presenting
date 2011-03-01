@@ -89,7 +89,7 @@ function duplicate_current_slide() {
   for(var i = 0; i < number_of_notes; i++) {
     var note = new Note();
     var copy_from_id = $(current_notes[i]).attr("id");
-    var copied_note = slides_hash[hash_id].notes[copy_from_id];
+    var copied_note = slides_hash[id].notes[copy_from_id];
        note.top = copied_note.top;
        note.left = copied_note.left;
        note.width = copied_note.width;
@@ -129,7 +129,6 @@ function delete_current_slide() {
   
   delete slides_hash[id];
   save_slides();
-  delete_inactive_notes();
   set_and_run_code($(".current"));
   update_numbering();
 }

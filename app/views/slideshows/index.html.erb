@@ -1,14 +1,21 @@
 <%= javascript_include_tag 'slideshow.show' %>
-<script type="text/javascript">
-  var covers = [<%= @covers.join(",").html_safe %>];
-  var all = <%= @all.to_json.html_safe %>;
-  console.log(covers);
-</script>
 
-<h1> List of all slideshows</h1>
-<% @all.each do |s| %>
-  <div> <%= link_to s.title, s%> </div>
+<h1> Yay for slideshows </h1>
+<div id="user_nav">  
+  <% if current_user %>  
+    Welcome, <%= current_user.name %>!  
+    <%= link_to "Sign Out", signout_path %>  
+  <% else %>  
+    <h3> Sign in with </h3>
+    <% ["twitter","facebook"].each do |provider| %>
+      <%= link_to image_tag("auth/#{provider}_64.png"), "/auth/#{provider}" %>
+    <% end %>
+  <% end %>  
+</div>  
+<% if current_user %>
+  <script type="text/javascript">
+    var all = <%= @all.to_json.html_safe %>;
+    var add_new = <%= @add_new.to_json.html_safe %>;
+  </script>
+  <div id="covers"></div>
 <% end %>
-
-
-

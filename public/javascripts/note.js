@@ -289,18 +289,41 @@ var Note = function() {
 Note.prototype = {
   note_id: function() {return "note_"+this.id;}
 }
+
 var Slide = function() {
   this.notes = {};
-  this.id = (new Date()).getTime();
-  this.code = '// You can access raphael using \'paper\' by default\n'+ 
-              '// paper.circle(100, 100, 100)\n'+
-              '// You can access d3 using d3_paper\n';
+  this.id = (new Date()).getTime()+"_"+slideshow_id;
+  this.code = '// There are three useful variables defined for every slide:\n'+
+              '//   paper, d3_paper, and slide\n'+
+              '// Use \'paper\' and \'d3_paper\' to access Raphael and d3 respectively\n'+
+              '// paper.circle(100,100,100);\n'+
+              '// The slide variable is simply the current slide id wrapped\n'+
+              '// using jQuery. slide.css("background", "blue")\n';
 }
 Slide.prototype = {
   raphael_id: function() { return "raphael_"+this.id;},
   slide_id: function() { return "slide_"+this.id;}
 }
-
+function new_slide_from_other(other) {
+  var s = new Slide();
+  s.code = other.code;
+  slides_hash[s.slide_id()] = s;
+  for(n_id in other.notes) {
+    new_note_from_other(other.notes[n_id], s);
+  }
+}
+function new_note_from_other(other, slide) {
+  var n = new Note();
+  n.top = other.top;
+  n.left = other.left;
+  n.width = other.width;
+  n.content = other.content;
+  n.slide_id = "slide_"+slide.id;
+  while(slide.notes[n.note_id()] != null) {
+    n.id++;
+  }
+  slide.notes[n.note_id()] = n;
+}
 function new_note_from_click(event, parent_id) {
   var n = new Note();
   n.slide_id = parent_id;
@@ -355,8 +378,8 @@ function local_name(type) {
   }
 }
 function read_slides() { slides_hash = JSON.parse(localStorage.getItem(local_name("slides"))); }
-function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); send_to_server(); }
-function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); send_to_server(); }
+function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); }
+function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); }
 
 function send_to_server() {
   var slideshow_hash = {};
