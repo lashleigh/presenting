@@ -1,7 +1,0 @@
-<%= javascript_include_tag 'application' %>
-<p> This live preview is powered by linen, a client side javascript parser </p>
-<% form_tag do %>
-  <%= text_area_tag('post_content', @content, :rows => 40, :cols => 50)%>
-<% end %>
-
-<div id="preview"></div>
