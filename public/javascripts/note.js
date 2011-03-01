@@ -63,19 +63,12 @@ $(function() {
     $.post("/update", {
       id: slideshow_id,
       version: local_version,
+      cover: create_cover(),
       content: content }, function(txtstatus, result) {
-        if(result == "Success") {
-          $("#options").after('<p id="success" style="display:none;">'+txtstatus+'</p>');
-          $("#slides_container #success").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
-            $(this).remove();
-            });
-        } else {
-          $("#options").after('<p id="failure" style="display:none;">'+txtstatus+'</p>');
-          $("#slides_container #failure").fadeIn(1500);
-          $("#slides_container #failure").bind("click", function() {
-            $(this).remove();
-            });
-        }
+        $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
+        $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
+          $(this).remove();
+          });
       });
   });
   $("#delete_current").live("click", function() { delete_current_slide(); })
@@ -303,24 +296,6 @@ function go_to_next() {
     create_new_slide_at_end();
   }
 }
-function create_canvas(slide) {
-  d3_papers[slide.id] = d3.select("#d3_"+slide.id);
-  var raphael_id = "raphael_"+slide.id;
-  raphael_papers[slide.id] = Raphael(raphael_id, 900, 700);//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
- 
-  set_canvas(slide);
-}
-function set_canvas(slide) {
-  var paper = raphael_papers[slide.id];
-  var d3_paper = d3_papers[slide.id];
-  paper.clear();
-  $("#d3_"+slide.id).empty();
-  try {
-    (new Function("paper", "d3_paper", "window", "document", slide.code ) ).call(paper, paper, d3_paper);
-  } catch (e) {
-    alert(e.message || e);
-  }
-}
 var Note = function() {
   this.id = (new Date()).getTime();
   this.slide_id;
@@ -350,22 +325,7 @@ function new_note_from_click(event, parent_id) {
   notes_hash[n.note_id()] = n;
   save_notes();
 }
-function make_a_note(note) {
-  $("#"+note.slide_id+" .notes_container").append(note_html(note));
-}
-function note_html(note) {
-    return '<div id="note_'+note.id+'" class="note editable" style="'+get_style(note)+'">'+
-                              '<div class="preview">'+linen(note.content)+'</div>'+
-                              '<textarea class="edit_area" style="width:'+note.width+'px;height:'+note.height+'px;"  >'+note.content+'</textarea>'+
-                              '</div>'
-}
-function slide_html(slide) {
-    return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
-              '<div id="d3_'+slide.id+'" class="d3_container"> </div>'+
-              '<div id="raphael_'+slide.id+'" class="raphael_container notes_container"> </div>'+
-              '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
-           '</div>'
-}
+
 function make_notes() {
   if( notes_hash != null) {
     for( n in notes_hash) {
@@ -471,7 +431,21 @@ function delete_inactive_notes() {
     }
   }
 }
-
+function create_cover() {
+  var cover = {};
+  var slide_1 = slides_hash[order[0]];
+  var notes_1 = [];
+  for(var n in notes_hash) {
+    if(notes_hash[n].slide_id == order[0]) {
+      notes_1.push(notes_hash[n]);
+    }
+  }
+  cover.slide = slide_1;
+  cover.notes = notes_1;
+  cover.height = slideHeight;
+  cover.width = slideWidth;
+  return JSON.stringify(cover);
+}
 function handleCorner() {
     scale = $("#scale-slider").val() / 100;
     var margin_right = (-1)*(slideWidth*(1-scale)/2);

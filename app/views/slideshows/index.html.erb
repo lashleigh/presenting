@@ -1,4 +1,14 @@
+<%= javascript_include_tag 'slideshow.show' %>
+<script type="text/javascript">
+  var covers = [<%= @covers.join(",").html_safe %>];
+  var all = <%= @all.to_json.html_safe %>;
+  console.log(covers);
+</script>
+
 <h1> List of all slideshows</h1>
 <% @all.each do |s| %>
   <div> <%= link_to s.title, s%> </div>
 <% end %>
+
+
+

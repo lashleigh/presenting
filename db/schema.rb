@@ -10,14 +10,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110226072339) do
+ActiveRecord::Schema.define(:version => 20110228085304) do
 
   create_table "authorizations", :force => true do |t|
-    t.string   "provider"
-    t.string   "uid"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string    "provider"
+    t.string    "uid"
+    t.integer   "user_id"
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
   end
 
   create_table "previews", :force => true do |t|
@@ -33,13 +33,14 @@ ActiveRecord::Schema.define(:version => 20110226072339) do
     t.timestamp "updated_at"
     t.integer   "version",    :default => 0
     t.integer   "user_id"
+    t.text      "cover"
   end
 
   create_table "users", :force => true do |t|
-    t.string   "name"
-    t.boolean  "admin",      :default => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string    "name"
+    t.boolean   "admin",      :default => false
+    t.timestamp "created_at"
+    t.timestamp "updated_at"
   end
 
 end

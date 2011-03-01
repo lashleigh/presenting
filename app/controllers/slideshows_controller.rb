@@ -1,6 +1,7 @@
 class SlideshowsController < ApplicationController
   def index
     @all = Slideshow.all
+    @covers = @all.map(&:cover)
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @slideshow }
@@ -46,6 +47,7 @@ class SlideshowsController < ApplicationController
     if current_user and @slideshow.user_id = current_user.id
       @slideshow.content = params[:content]
       @slideshow.version = params[:version]
+      @slideshow.cover   = params[:cover]
       @slideshow.save
       respond_to do |format|
         format.html { render :text => "Success" }
@@ -58,4 +60,5 @@ class SlideshowsController < ApplicationController
       end
     end
   end
+
 end

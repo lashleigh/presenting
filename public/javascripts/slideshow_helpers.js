@@ -51,4 +51,37 @@ function prettify() {
   prettyPrint();
 }
 
-
+function make_a_note(note) {
+  $("#"+note.slide_id+" .notes_container").append(note_html(note));
+}
+function note_html(note) {
+    return '<div id="note_'+note.id+'" class="note editable" style="'+get_style(note)+'">'+
+                              '<div class="preview">'+linen(note.content)+'</div>'+
+                              '<textarea class="edit_area" style="width:'+note.width+'px;height:'+note.height+'px;"  >'+note.content+'</textarea>'+
+                              '</div>'
+}
+function slide_html(slide) {
+    return '<div id="slide_'+slide.id+'" class="slide zoomed_in_slide slide_transition">'+
+              '<div id="d3_'+slide.id+'" class="d3_container"> </div>'+
+              '<div id="raphael_'+slide.id+'" class="raphael_container notes_container"> </div>'+
+              '<div class="slide_number">'+($(".slide").size()+1)+'</div>'+
+           '</div>'
+}
+function create_canvas(slide) {
+  d3_papers[slide.id] = d3.select("#d3_"+slide.id);
+  var raphael_id = "raphael_"+slide.id;
+  raphael_papers[slide.id] = Raphael(raphael_id, $(".slide").width(), $(".slide").height());//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
+ 
+  set_canvas(slide);
+}
+function set_canvas(slide) {
+  var paper = raphael_papers[slide.id];
+  var d3_paper = d3_papers[slide.id];
+  paper.clear();
+  $("#d3_"+slide.id).empty();
+  try {
+    (new Function("paper", "d3_paper", "window", "document", slide.code ) ).call(paper, paper, d3_paper);
+  } catch (e) {
+    alert(e.message || e);
+  }
+}

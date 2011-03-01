@@ -1,3 +1,5 @@
+<%= javascript_include_tag 'slideshow.show' %>
+
 <h1> Yay for slideshows </h1>
 <div id="user_nav">  
   <% if current_user %>  
@@ -11,8 +13,9 @@
   <% end %>  
 </div>  
 <% if current_user %>
-  <% @all.each do |s| %>
-    <div> <%= link_to s.title, s%> </div>
-  <% end %>
-  <%= link_to 'New', new_slideshow_path %>
+<script type="text/javascript">
+  var covers = [<%= @covers.join(",").html_safe %>];
+  var all = <%= @all.to_json.html_safe %>;
+</script>
+  <div id="covers"></div>
 <% end %>
