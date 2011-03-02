@@ -1,6 +1,7 @@
 var raphael_papers = {}, d3_papers = {};
 var all_shows = {};
 var scale = .4;
+var slideWidth, slideHeight;
 
 $(function() {
   $("body").css("overflow", "auto");
@@ -8,20 +9,21 @@ $(function() {
   for(show_id in all_shows) {
     set_initial(show_id, 0);
   }
+  slideWidth = $(".slide").width();
+  slideHeight = $(".slide").height();
   if(typeof add_new != "undefined") {
     add_new = JSON.parse(add_new);
     var new_slide = add_new.slides[add_new.order[0]];
-    $("#user_thumbnails").append(gridify_slide_html(new_slide))
-    create_canvas(new_slide);
+    $("#user_thumbnails").prepend(gridify_slide_html(new_slide))
     for(n_id in new_slide.notes) {
       make_a_note(new_slide.notes[n_id]);
     }
-    $(".slide").last().attr("id", "slide_new");
-    $("#slide_new").wrap('<a href="/slideshows/new/" class="expose" id="new" />');
-    $("#slide_new .slide_number").remove();
+    $("#slide_1299017729547_6").addClass("slide_new");
+    $(".slide_new").wrap('<a href="/slideshows/new/" class="expose" id="new" />');
+    $("#new .slide_number").remove();
+    create_canvas(new_slide);
   }
   clear_borders();
-
   $(".notnew").live("mousemove", function(e) {
     var show_id = $(this).attr("id").split("_")[1]
     var this_show = all_shows["ss_"+show_id];
@@ -36,10 +38,10 @@ $(function() {
 function change_visible_slide(this_show, index) {
   var visible_slide = this_show.slides[this_show.order[index]];
   $("#expose_"+this_show.id).html(gridify_slide_html(visible_slide));
-  create_canvas(visible_slide);
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
   }
+  create_canvas(visible_slide);
   clear_borders();
   $("#slide_"+visible_slide.id+" .slide_number").html(index);
   this_show.visible_index = index;
@@ -50,10 +52,10 @@ function set_initial(show_id, index) {
   visible_slide.visible_index = index;
   $("#expose_"+visible_slide.id).remove();
   $("#user_thumbnails").append(gridify_slide_html(visible_slide));
-  create_canvas(visible_slide);
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
   }
+  create_canvas(visible_slide);
   $("#slide_"+visible_slide.id).wrap('<a href="/slideshows/'+this_show.id+'/" class="expose notnew" id="expose_'+this_show.id+'" />');
   $("#slide_"+visible_slide.id+" .slide_number").html(index);
 }
