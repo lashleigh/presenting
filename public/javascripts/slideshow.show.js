@@ -11,7 +11,7 @@ $(function() {
   if(typeof add_new != "undefined") {
     add_new = JSON.parse(add_new);
     var new_slide = add_new.slides[add_new.order[0]];
-    $("#covers").append(gridify_slide_html(new_slide))
+    $("#user_thumbnails").append(gridify_slide_html(new_slide))
     create_canvas(new_slide);
     for(n_id in new_slide.notes) {
       make_a_note(new_slide.notes[n_id]);
@@ -49,7 +49,7 @@ function set_initial(show_id, index) {
   var visible_slide = this_show.slides[this_show.order[index]];
   visible_slide.visible_index = index;
   $("#expose_"+visible_slide.id).remove();
-  $("#covers").append(gridify_slide_html(visible_slide));
+  $("#user_thumbnails").append(gridify_slide_html(visible_slide));
   create_canvas(visible_slide);
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
@@ -59,12 +59,12 @@ function set_initial(show_id, index) {
 }
 
 function read_shows() {
-  for(var i = 0; i < all.length; i++) {
-    all_shows["ss_"+all[i].slideshow.id] = JSON.parse(all[i].slideshow.content);
-    all_shows["ss_"+all[i].slideshow.id].title = all[i].slideshow.title;
-    all_shows["ss_"+all[i].slideshow.id].position = i;
-    all_shows["ss_"+all[i].slideshow.id].id = all[i].slideshow.id;
-    all_shows["ss_"+all[i].slideshow.id].visible_index = 0;
+  for(var i = 0; i < yours.length; i++) {
+    all_shows["ss_"+yours[i].slideshow.id] = JSON.parse(yours[i].slideshow.content);
+    all_shows["ss_"+yours[i].slideshow.id].title = yours[i].slideshow.title;
+    all_shows["ss_"+yours[i].slideshow.id].position = i;
+    all_shows["ss_"+yours[i].slideshow.id].id = yours[i].slideshow.id;
+    all_shows["ss_"+yours[i].slideshow.id].visible_index = 0;
   }
   for(var s in all_shows) {
     all_shows[s].num_slides = all_shows[s].order.length;

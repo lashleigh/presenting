@@ -1,6 +1,5 @@
 <%= javascript_include_tag 'slideshow.show' %>
 
-<h1> Yay for slideshows </h1>
 <div id="user_nav">  
   <% if current_user %>  
     Welcome, <%= current_user.name %>!  
@@ -12,10 +11,16 @@
     <% end %>
   <% end %>  
 </div>  
+<script type="text/javascript">
+  var always = <%= @always.to_json.html_safe %>;
+</script>
+
+<div id="always_visible"> </div>
+
 <% if current_user %>
   <script type="text/javascript">
-    var all = <%= @all.to_json.html_safe %>;
+    var yours = <%= @yours.to_json.html_safe %>;
     var add_new = <%= @add_new.to_json.html_safe %>;
   </script>
-  <div id="covers"></div>
+  <div id="user_thumbnails"> </div>
 <% end %>

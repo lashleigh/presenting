@@ -1,8 +1,13 @@
 class SlideshowsController < ApplicationController
   def index
-    six = Slideshow.find('6')
-    @all = Slideshow.all - six.to_a
-    @add_new = six.content
+    if current_user 
+      six = Slideshow.find('6')
+      @yours = Slideshow.find_all_by_user_id(current_user.id)
+      @all = Slideshow.all - six.to_a - @yours
+      @add_new = six.content
+    else
+      @all = Slideshow.all
+    end
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @slideshow }
