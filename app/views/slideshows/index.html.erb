@@ -18,6 +18,7 @@
 <div id="always_visible"> </div>
 
 <% if current_user %>
+  <div id="new_slideshow" style="height:auto;overflow:hidden;"></div>
   <script type="text/javascript">
     var yours = <%= @yours.to_json.html_safe %>;
     var add_new = <%= @add_new.to_json.html_safe %>;

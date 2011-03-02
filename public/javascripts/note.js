@@ -1,15 +1,16 @@
 var scale = 0.7;
 var code_editor;
 var which_db;
-var local_version, order = [];
+var local_version, order = [], dim = {};
 var uiLeft, uiTop, uiWidth, uiHeight;
-var slideWidth, slideHeight, cylonOffset;
 var slides_hash = {}, raphael_papers = {}, d3_papers = {};
 $(function() {
 
   if( (typeof slideshow_hash != "undefined") && (slideshow_version > read_version()) ) {
     which_db = "using db version";
     slides_hash = slideshow_hash.slides;
+    dim[width] = slideshow_hash.width;
+    dim[height] = slideshow_hash.height;
     order = slideshow_hash.order;
     if(typeof order == "undefined") { read_order();}
     make_slides();
@@ -18,10 +19,15 @@ $(function() {
     which_db = "using local version";
     read_slides();
     read_order();
+    read_dimensions();
+    if(dim == null) {
+      dim = {};
+      dim.width = 900;
+      dim.height = 700;
+      save_dimensions();
+    }
     make_slides();
   }
-  slideWidth = $(".slide").width();
-  slideHeight = $(".slide").height();
 
   var code_id = document.getElementById('code_mirror_textarea');
   code_editor = new CodeMirror.fromTextArea(code_id, {
@@ -39,7 +45,7 @@ $(function() {
     set_current(0);
     //presentationMode();
     editingMode();
-    var editor_width = document.width - 10 - slideWidth*scale;
+    var editor_width = document.width - 10 - dim.width*scale;
     $("#editor").css('width', editor_width+'px');
     $(code_editor.win.document.body).bind("keydown", function(e) {
       if(e.keyCode == 27) {
@@ -122,15 +128,15 @@ $(function() {
           uiWidth = ui.size.width+ui.position.left;
           uiLeft = 0;
         } 
-        if( (ui.position.left + ui.size.width) > slideWidth ) { 
-          uiWidth = slideWidth - ui.position.left;
+        if( (ui.position.left + ui.size.width) > dim.width ) { 
+          uiWidth = dim.width - ui.position.left;
         }
         if( ui.position.top < 0) {
           uiHeight = ui.size.height+ui.position.top;
           uiTop = 0;
         } 
-        if( ui.position.top + ui.size.height > slideHeight ) {
-          uiHeight = slideHeight - ui.position.top;
+        if( ui.position.top + ui.size.height > dim.height ) {
+          uiHeight = dim.height - ui.position.top;
         }
         $(this).find('.preview').css("width",(uiWidth)+"px");
         $(this).find('.edit_area').css("width",(uiWidth)+"px");
@@ -245,7 +251,7 @@ function begin_coding_mode() {
   $("#slide_options").hide();
 
   scale = $("#scale-slider").val() / 100;
-  var margin_right = (-1)*(slideWidth*(1-scale)/2);
+  var margin_right = (-1)*(dim.width*(1-scale)/2);
   $(".current").css('-webkit-transform','scale('+scale+')');
   $(".current").css('margin-right', margin_right+'px');
 }
@@ -283,7 +289,7 @@ function go_to_next() {
 var Note = function() {
   this.id = (new Date()).getTime();
   this.slide_id;
-  this.top; this.left; this.width = slideWidth/3; this.height = slideHeight/4;
+  this.top; this.left; this.width = dim.width/3; this.height = dim.height/4;
   this.content = "p{color:red;}. Placeholder";
 }
 Note.prototype = {
@@ -377,26 +383,11 @@ function local_name(type) {
     return type;
   }
 }
+function read_dimensions() { dim = JSON.parse(localStorage.getItem(local_name("dim"))); }
+function save_dimensions() { localStorage.setItem(local_name("dim"), JSON.stringify(dim)); increment_version(); }
 function read_slides() { slides_hash = JSON.parse(localStorage.getItem(local_name("slides"))); }
 function save_slides() { localStorage.setItem(local_name("slides"), JSON.stringify(slides_hash)); increment_version(); }
 function save_order()  { localStorage.setItem(local_name("order"), JSON.stringify(order));        increment_version(); }
-
-function send_to_server() {
-  var slideshow_hash = {};
-  slideshow_hash.slides = slides_hash;
-  slideshow_hash.order = order;
-  var content = JSON.stringify(slideshow_hash);
-  $.post("/update", {
-    id: slideshow_id,
-    version: local_version,
-    content: content }, function(txtstatus, result) {
-      $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
-      $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
-        $(this).remove();
-        });
-    });
-}
-
 function read_order()  { 
   order = JSON.parse(localStorage.getItem(local_name("order"))); 
   if(order == null) {
@@ -417,6 +408,23 @@ function increment_version()  {
   var updated_version = v ? (v+=1):1
   localStorage.setItem(local_name("version"), updated_version ); 
 }
+
+function send_to_server() {
+  var slideshow_hash = {};
+  slideshow_hash.slides = slides_hash;
+  slideshow_hash.order = order;
+  var content = JSON.stringify(slideshow_hash);
+  $.post("/update", {
+    id: slideshow_id,
+    version: local_version,
+    content: content }, function(txtstatus, result) {
+      $("#options").after('<p id="status" style="display:none;">'+txtstatus+'</p>');
+      $("#slides_container #status").fadeIn(1500).delay(500).fadeOut(1500).delay(500).queue(function() {
+        $(this).remove();
+        });
+    });
+}
+
 
 function set_and_run_code(selector) {
   var id = extract_id(selector);
@@ -443,8 +451,8 @@ function extract_note_id(selector) {
 }
 function handleCorner() {
     scale = $("#scale-slider").val() / 100;
-    var margin_right = (-1)*(slideWidth*(1-scale)/2);
-    var editor_width = document.width - 10 - slideWidth*scale;
+    var margin_right = (-1)*(dim.width*(1-scale)/2);
+    var editor_width = document.width - 10 - dim.width*scale;
     $(".current").css('-webkit-transform','scale('+scale+')');
     $(".current").css('margin-right', margin_right+'px');
     $("#editor").css('width', editor_width+'px');

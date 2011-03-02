@@ -1,7 +1,7 @@
 var raphael_papers = {}, d3_papers = {};
 var all_shows = {};
 var scale = .4;
-var slideWidth, slideHeight;
+var dim = {};
 
 $(function() {
   $("body").css("overflow", "auto");
@@ -9,19 +9,8 @@ $(function() {
   for(show_id in all_shows) {
     set_initial(show_id, 0);
   }
-  slideWidth = $(".slide").width();
-  slideHeight = $(".slide").height();
-  if(typeof add_new != "undefined") {
-    add_new = JSON.parse(add_new);
-    var new_slide = add_new.slides[add_new.order[0]];
-    $("#user_thumbnails").prepend(gridify_slide_html(new_slide))
-    for(n_id in new_slide.notes) {
-      make_a_note(new_slide.notes[n_id]);
-    }
-    $("#slide_1299017729547_6").addClass("slide_new");
-    $(".slide_new").wrap('<a href="/slideshows/new/" class="expose" id="new" />');
-    $("#new .slide_number").remove();
-    create_canvas(new_slide);
+  if(add_new) {
+    new_from_slideshow();
   }
   clear_borders();
   $(".notnew").live("mousemove", function(e) {
@@ -55,6 +44,8 @@ function set_initial(show_id, index) {
   for(n_id in visible_slide.notes) {
     make_a_note(visible_slide.notes[n_id]);
   }
+  dim.width = all_shows[show_id].width;
+  dim.height = all_shows[show_id].height;
   create_canvas(visible_slide);
   $("#slide_"+visible_slide.id).wrap('<a href="/slideshows/'+this_show.id+'/" class="expose notnew" id="expose_'+this_show.id+'" />');
   $("#slide_"+visible_slide.id+" .slide_number").html(index);
@@ -70,6 +61,8 @@ function read_shows() {
   }
   for(var s in all_shows) {
     all_shows[s].num_slides = all_shows[s].order.length;
+    all_shows[s].width  = all_shows[s].width;
+    all_shows[s].height = all_shows[s].height;
   }
 }
 
@@ -80,4 +73,36 @@ function gridify_slide_html(slide) {
               '<div class="slide_number"></div>'+
            '</div>'
 
+}
+
+function set_new() {
+  $(".make_new").css({color: "black", 
+               "text-shadow": "rgba(0, 0, 0, 0.5) 5px 5px 2px"});
+  var w = dim.width*scale;
+  var h = dim.height*scale;
+  $(".make_new").bind("mousemove", function(e) {
+    var posx = e.pageX - $(this).offset().left;
+    var posy = e.pageY - $(this).offset().top;
+    var xoff = -(posx-w/2)*40/w;
+    var yoff = -(posy-h/2)*40/h;
+    var offset = Math.abs((Math.round(xoff)?xoff:5)*(Math.round(yoff)?yoff:5));
+    $(".make_new").css("text-shadow",
+                "rgba(0, 0, 0, 0.5) "+xoff+"px "+yoff+"px +"+
+                     Math.log(offset)+"px");  
+  });
+}
+function new_from_slideshow() {
+  add_new_slides = JSON.parse(add_new.slideshow.content);
+  var new_slide = add_new_slides.slides[add_new_slides.order[0]];
+  $("#new_slideshow").append(gridify_slide_html(new_slide))
+  for(n_id in new_slide.notes) {
+    make_a_note(new_slide.notes[n_id]);
+  }
+  $("#slide_1299017729547_6").addClass("slide_new");
+  $(".slide_new").wrap('<a href="/slideshows/new/" class="new_slideshow" id="new" />');
+  $("#new .slide_number").remove();
+  dim.width = add_new.slideshow.width;
+  dim.height = add_new.slideshow.height;
+  console.log(dim);
+  create_canvas(new_slide);
 }

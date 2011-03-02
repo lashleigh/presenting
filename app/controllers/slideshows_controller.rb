@@ -1,10 +1,9 @@
 class SlideshowsController < ApplicationController
   def index
     if current_user 
-      six = Slideshow.find('6')
-      @yours = Slideshow.find_all_by_user_id(current_user.id) - six.to_a
+      @add_new = Slideshow.find('6')
+      @yours = Slideshow.find_all_by_user_id(current_user.id) - @add_new.to_a
       @all = Slideshow.all - @yours
-      @add_new = six.content
     else
       @all = Slideshow.all
     end

@@ -4,7 +4,7 @@ function header_note(slide) {
    var header_note = new Note();
    header_note.top = 0;
    header_note.left = 0;
-   header_note.width = slideWidth;
+   header_note.width = dim.width;
    header_note.height = 200;
    header_note.content = "h1. Header holder";
    header_note.slide_id = "slide_"+slide.id;
@@ -19,8 +19,8 @@ function body_note(slide) {
   var body_note = new Note();
    body_note.top = 220;
    body_note.left = 0;
-   body_note.width = slideWidth;
-   body_note.height = slideHeight - body_note.top;
+   body_note.width = dim.width;
+   body_note.height = dim.height - body_note.top;
    body_note.content = "p(pink). paragraphs here";
    body_note.slide_id = "slide_"+slide.id;
    while(slide.notes[body_note.note_id()] != null) {
@@ -70,7 +70,7 @@ function slide_html(slide) {
 function create_canvas(slide) {
   d3_papers[slide.id] = d3.select("#d3_"+slide.id);
   var raphael_id = "raphael_"+slide.id;
-  raphael_papers[slide.id] = Raphael(raphael_id, $(".slide").width(), $(".slide").height());//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
+  raphael_papers[slide.id] = Raphael(raphael_id, dim.width, dim.height);//, dashed = {fill: "none", stroke: "#666", "stroke-dasharray": "- "};;
  
   set_canvas(slide);
 }
